@@ -2,25 +2,23 @@ import Link from "next/link";
 import { Header, Footer } from "@/components/chrome";
 import { NeighborhoodSearch } from "@/components/neighborhood-search";
 import { ArtworkCard } from "@/components/artwork-card";
-import {
-  ARTWORKS,
-  getArtist,
-  getArtworkLocation,
-  uniqueNeighborhoods,
-  uniqueTags,
-} from "@/lib/data";
+import { fetchArtists, fetchArtworks } from "@/lib/repo";
 
-export const dynamic = "force-static";
+export const revalidate = 60;
 
 type SP = Promise<{ loc?: string; tag?: string; sort?: string }>;
 
 export default async function BrowsePage({ searchParams }: { searchParams: SP }) {
   const { loc, tag, sort } = await searchParams;
-  const allTags = uniqueTags();
-  const neighborhoods = uniqueNeighborhoods();
+  const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
+  const byArtist = new Map(artists.map((a) => [a.id, a]));
 
-  let results = ARTWORKS.filter((w) => {
-    const a = getArtist(w.artistId)!;
+  const allTags = Array.from(new Set(artworks.flatMap((w) => w.tags))).sort();
+  const neighborhoods = Array.from(new Set(artists.map((a) => `${a.neighborhood}, ${a.city}`))).sort();
+
+  let results = artworks.filter((w) => {
+    const a = byArtist.get(w.artistId);
+    if (!a) return false;
     const locStr = `${a.neighborhood} ${a.city} ${a.country}`.toLowerCase();
     const matchLoc = loc ? locStr.includes(loc.toLowerCase()) : true;
     const matchTag = tag ? w.tags.includes(tag) : true;
@@ -126,11 +124,14 @@ export default async function BrowsePage({ searchParams }: { searchParams: SP })
                 {results.length} piece{results.length === 1 ? "" : "s"} found
               </p>
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {results.map((w, i) => {
-                  const l = getArtworkLocation(w);
-                  void l; // for clarity / future use
-                  return <ArtworkCard key={w.id} artwork={w} index={i} />;
-                })}
+                {results.map((w, i) => (
+                  <ArtworkCard
+                    key={w.id}
+                    artwork={w}
+                    index={i}
+                    artist={byArtist.get(w.artistId) ?? null}
+                  />
+                ))}
               </div>
             </>
           )}

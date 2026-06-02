@@ -32,18 +32,22 @@ export async function listArtworkAction(
   const medium = (formData.get("medium") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
   const imageUrl = (formData.get("imageUrl") as string)?.trim();
+  const latStr = (formData.get("lat") as string)?.trim();
+  const lngStr = (formData.get("lng") as string)?.trim();
   const tags = ((formData.get("tags") as string) ?? "")
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
 
   if (!title || !artistHandle || !city || !neighborhood || !priceStr || !imageUrl) {
-    return { ok: false, message: "Fill out title, artist handle, city, neighborhood, price, and image URL." };
+    return { ok: false, message: "Fill out title, artist handle, city, neighborhood, price, and image." };
   }
   const price = Number(priceStr);
   if (Number.isNaN(price) || price <= 0) {
     return { ok: false, message: "Price needs to be a positive number." };
   }
+  const lat = latStr ? Number(latStr) : null;
+  const lng = lngStr ? Number(lngStr) : null;
 
   if (!isSupabaseConfigured) {
     return {
@@ -58,10 +62,12 @@ export async function listArtworkAction(
     return { ok: false, message: "Couldn't reach Supabase. Try again in a moment." };
   }
 
+  const { data: { user } } = await sb.auth.getUser();
+
   // Find or create the artist by handle.
   const { data: existing } = await sb
     .from("artists")
-    .select("id")
+    .select("id, user_id")
     .eq("handle", artistHandle)
     .maybeSingle();
 
@@ -71,12 +77,15 @@ export async function listArtworkAction(
     const { data: created, error: artistErr } = await sb
       .from("artists")
       .insert({
+        user_id: user?.id ?? null,
         handle: artistHandle,
         name: artistName || artistHandle.replace(/^@/, ""),
         city,
         neighborhood,
         country: country || "Earth",
         country_flag: "🌍",
+        lat,
+        lng,
       })
       .select("id")
       .single();
@@ -85,6 +94,9 @@ export async function listArtworkAction(
       return { ok: false, message: `Couldn't create artist: ${artistErr?.message ?? "unknown error"}` };
     }
     artistId = created.id;
+  } else if (user && existing && !existing.user_id) {
+    // Claim profile if it was orphaned and the handle matches a logged-in user.
+    await sb.from("artists").update({ user_id: user.id }).eq("id", existing.id);
   }
 
   const slug = `${slugify(title)}-${Date.now().toString(36).slice(-4)}`;
@@ -100,6 +112,8 @@ export async function listArtworkAction(
     tags,
     city: city || null,
     neighborhood: neighborhood || null,
+    lat,
+    lng,
   });
 
   if (workErr) {
@@ -108,5 +122,6 @@ export async function listArtworkAction(
 
   revalidatePath("/browse");
   revalidatePath("/");
+  revalidatePath("/map");
   return { ok: true, message: "Boom — your art is on the wall.", slug };
 }

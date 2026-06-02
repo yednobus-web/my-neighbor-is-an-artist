@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import { Artwork, getArtist, getArtworkLocation } from "@/lib/data";
+import { Artwork, Artist, getArtist } from "@/lib/data";
 
 const SHADOWS = [
   "shadow-graffiti-pink",
@@ -12,11 +12,22 @@ const SHADOWS = [
 
 const ROTATIONS = ["-rotate-1", "rotate-1", "-rotate-2", "rotate-2", "rotate-0"] as const;
 
-export function ArtworkCard({ artwork, index = 0 }: { artwork: Artwork; index?: number }) {
-  const artist = getArtist(artwork.artistId)!;
-  const loc = getArtworkLocation(artwork);
+export function ArtworkCard({
+  artwork,
+  index = 0,
+  artist: explicitArtist,
+}: {
+  artwork: Artwork;
+  index?: number;
+  artist?: Artist | null;
+}) {
+  const artist = explicitArtist ?? getArtist(artwork.artistId);
+  if (!artist) return null;
+
   const shadow = SHADOWS[index % SHADOWS.length];
   const rotate = ROTATIONS[index % ROTATIONS.length];
+  const neighborhood = artwork.neighborhood ?? artist.neighborhood;
+  const city = artwork.city ?? artist.city;
 
   return (
     <Link
@@ -33,6 +44,7 @@ export function ArtworkCard({ artwork, index = 0 }: { artwork: Artwork; index?: 
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
+            unoptimized={!artwork.image.includes("unsplash.com")}
           />
           <div className="absolute left-2 top-2 rotate-[-4deg] bg-sun-yellow px-2 py-0.5 font-[family-name:var(--font-bangers)] text-sm tracking-widest text-ink shadow-graffiti">
             {artwork.tags[0]?.toUpperCase()}
@@ -54,7 +66,7 @@ export function ArtworkCard({ artwork, index = 0 }: { artwork: Artwork; index?: 
           <div className="flex items-center gap-1 text-xs text-ink/70">
             <MapPin className="h-3 w-3" />
             <span>
-              {loc.neighborhood}, {loc.city} {loc.countryFlag}
+              {neighborhood}, {city} {artist.countryFlag}
             </span>
           </div>
         </div>

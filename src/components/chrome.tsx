@@ -20,6 +20,7 @@ export function Header() {
 
         <nav className="hidden items-center gap-6 font-[family-name:var(--font-bangers)] tracking-wider text-paper md:flex">
           <Link href="/browse" className="hover:text-hot-pink">BROWSE</Link>
+          <Link href="/map" className="hover:text-acid-lime">MAP</Link>
           <Link href="/neighborhoods" className="hover:text-cyber-cyan">NEIGHBORHOODS</Link>
           <Link href="/artists" className="hover:text-acid-lime">ARTISTS</Link>
           <Link href="/sell" className="hover:text-sun-yellow">SELL YOUR ART</Link>

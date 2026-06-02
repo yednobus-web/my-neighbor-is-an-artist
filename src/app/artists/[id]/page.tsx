@@ -3,8 +3,11 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Header, Footer } from "@/components/chrome";
 import { ArtworkCard } from "@/components/artwork-card";
-import { ARTISTS, ARTWORKS } from "@/lib/data";
+import { fetchArtists, fetchArtworks } from "@/lib/repo";
+import { ARTISTS } from "@/lib/data";
 import { MapPin } from "lucide-react";
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return ARTISTS.map((a) => ({ id: a.id }));
@@ -16,10 +19,11 @@ export default async function ArtistPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const artist = ARTISTS.find((a) => a.id === id);
+  const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
+  const artist = artists.find((a) => a.id === id);
   if (!artist) notFound();
 
-  const works = ARTWORKS.filter((w) => w.artistId === artist.id);
+  const works = artworks.filter((w) => w.artistId === artist.id);
 
   return (
     <>
@@ -82,7 +86,7 @@ export default async function ArtistPage({
             </h2>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {works.map((w, i) => (
-                <ArtworkCard key={w.id} artwork={w} index={i} />
+                <ArtworkCard key={w.id} artwork={w} index={i} artist={artist} />
               ))}
             </div>
           </section>

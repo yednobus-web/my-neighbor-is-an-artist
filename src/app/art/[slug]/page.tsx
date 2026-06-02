@@ -4,15 +4,15 @@ import { notFound } from "next/navigation";
 import { Header, Footer } from "@/components/chrome";
 import { ArtworkCard } from "@/components/artwork-card";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import {
-  ARTWORKS,
-  getArtist,
-  getArtworkBySlug,
-  getArtworkLocation,
-} from "@/lib/data";
+import { BuyNowButton } from "@/components/buy-now-button";
+import { fetchArtists, fetchArtworkBySlug, fetchArtworks } from "@/lib/repo";
+import { ARTWORKS } from "@/lib/data";
 import { MapPin, Heart, Share2, Truck, Shield } from "lucide-react";
 
+export const revalidate = 60;
+
 export function generateStaticParams() {
+  // Mock slugs at build time. Real DB slugs are served via dynamic rendering.
   return ARTWORKS.map((w) => ({ slug: w.slug }));
 }
 
@@ -22,14 +22,18 @@ export default async function ArtworkPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const artwork = getArtworkBySlug(slug);
+  const artwork = await fetchArtworkBySlug(slug);
   if (!artwork) notFound();
 
-  const artist = getArtist(artwork.artistId)!;
-  const loc = getArtworkLocation(artwork);
-  const moreFromArtist = ARTWORKS.filter(
-    (w) => w.artistId === artist.id && w.id !== artwork.id,
-  ).slice(0, 4);
+  const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
+  const artist = artists.find((a) => a.id === artwork.artistId);
+  if (!artist) notFound();
+
+  const neighborhood = artwork.neighborhood ?? artist.neighborhood;
+  const city = artwork.city ?? artist.city;
+  const moreFromArtist = artworks
+    .filter((w) => w.artistId === artist.id && w.id !== artwork.id)
+    .slice(0, 4);
 
   return (
     <>
@@ -51,6 +55,7 @@ export default async function ArtworkPage({
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"
                   priority
+                  unoptimized={!artwork.image.includes("unsplash.com")}
                 />
                 <div className="absolute right-3 top-3 rotate-3 bg-sun-yellow px-3 py-1 font-[family-name:var(--font-bangers)] text-xl tracking-widest text-ink shadow-graffiti">
                   ${artwork.price}
@@ -85,7 +90,7 @@ export default async function ArtworkPage({
               <div className="flex items-center gap-2 font-[family-name:var(--font-bangers)] tracking-widest text-cyber-cyan">
                 <MapPin className="h-5 w-5" />
                 <span className="text-xl">
-                  {loc.neighborhood.toUpperCase()}, {loc.city.toUpperCase()} {loc.countryFlag}
+                  {neighborhood.toUpperCase()}, {city.toUpperCase()} {artist.countryFlag}
                 </span>
               </div>
 
@@ -99,6 +104,7 @@ export default async function ArtworkPage({
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
+                <BuyNowButton slug={artwork.slug} />
                 <AddToCartButton
                   item={{
                     artworkId: artwork.id,
@@ -109,17 +115,19 @@ export default async function ArtworkPage({
                     artistHandle: artist.handle,
                   }}
                 />
+              </div>
+              <div className="flex gap-3">
                 <button
                   aria-label="Save"
-                  className="flex items-center justify-center border-4 border-paper bg-paper px-4 py-4 text-ink shadow-graffiti hover:bg-acid-lime"
+                  className="flex items-center justify-center border-4 border-paper bg-paper px-4 py-3 text-ink shadow-graffiti hover:bg-acid-lime"
                 >
-                  <Heart className="h-6 w-6" />
+                  <Heart className="h-5 w-5" />
                 </button>
                 <button
                   aria-label="Share"
-                  className="flex items-center justify-center border-4 border-paper bg-paper px-4 py-4 text-ink shadow-graffiti hover:bg-cyber-cyan"
+                  className="flex items-center justify-center border-4 border-paper bg-paper px-4 py-3 text-ink shadow-graffiti hover:bg-cyber-cyan"
                 >
-                  <Share2 className="h-6 w-6" />
+                  <Share2 className="h-5 w-5" />
                 </button>
               </div>
 
@@ -161,7 +169,7 @@ export default async function ArtworkPage({
               </h2>
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 {moreFromArtist.map((w, i) => (
-                  <ArtworkCard key={w.id} artwork={w} index={i} />
+                  <ArtworkCard key={w.id} artwork={w} index={i} artist={artist} />
                 ))}
               </div>
             </section>

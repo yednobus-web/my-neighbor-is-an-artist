@@ -10,6 +10,8 @@ export type Artist = {
   avatar: string;
   followers: number;
   vibe: string[];
+  lat: number;
+  lng: number;
 };
 
 export type Artwork = {
@@ -45,6 +47,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
     followers: 12400,
     vibe: ["graffiti", "feminist", "neon"],
+    lat: 40.6943,
+    lng: -73.9249,
   },
   {
     id: "a2",
@@ -59,6 +63,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
     followers: 28900,
     vibe: ["illustration", "cyberpunk", "anime"],
+    lat: 35.7050,
+    lng: 139.6492,
   },
   {
     id: "a3",
@@ -73,6 +79,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80",
     followers: 18700,
     vibe: ["collage", "afrofuturism", "mixed-media"],
+    lat: 6.5095,
+    lng: 3.3711,
   },
   {
     id: "a4",
@@ -87,6 +95,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&q=80",
     followers: 9300,
     vibe: ["graffiti", "skate", "lettering"],
+    lat: 19.4191,
+    lng: -99.1601,
   },
   {
     id: "a5",
@@ -101,6 +111,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&q=80",
     followers: 14200,
     vibe: ["pixel-art", "riso", "lo-fi"],
+    lat: 38.7137,
+    lng: -9.1450,
   },
   {
     id: "a6",
@@ -115,6 +127,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
     followers: 22100,
     vibe: ["textile", "rugs", "soft-sculpture"],
+    lat: 52.4994,
+    lng: 13.4088,
   },
   {
     id: "a7",
@@ -129,6 +143,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80",
     followers: 31400,
     vibe: ["ceramics", "sculpture", "body"],
+    lat: 37.5563,
+    lng: 126.9236,
   },
   {
     id: "a8",
@@ -143,6 +159,8 @@ export const ARTISTS: Artist[] = [
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
     followers: 7800,
     vibe: ["zine", "photo", "diy"],
+    lat: -23.5440,
+    lng: -46.6920,
   },
 ];
 
@@ -419,6 +437,8 @@ export function getArtworkLocation(w: Artwork): {
   neighborhood: string;
   country: string;
   countryFlag: string;
+  lat: number;
+  lng: number;
 } {
   const a = getArtist(w.artistId)!;
   return {
@@ -426,6 +446,8 @@ export function getArtworkLocation(w: Artwork): {
     neighborhood: w.neighborhood ?? a.neighborhood,
     country: a.country,
     countryFlag: a.countryFlag,
+    lat: a.lat,
+    lng: a.lng,
   };
 }
 

@@ -1,13 +1,38 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Header, Footer } from "@/components/chrome";
 import { useCart } from "@/components/cart-provider";
-import { Trash2, ShoppingBag } from "lucide-react";
+import { Trash2, ShoppingBag, Loader2 } from "lucide-react";
 
 export default function CartPage() {
   const { items, total, remove, clear } = useCart();
+  const [checkoutErr, setCheckoutErr] = useState<string | null>(null);
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  async function checkout() {
+    setCheckoutErr(null);
+    setCheckingOut(true);
+    try {
+      const r = await fetch("/api/stripe/cart-checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slugs: items.map((i) => i.slug) }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.url) {
+        setCheckoutErr(data.error ?? "Checkout failed.");
+        setCheckingOut(false);
+        return;
+      }
+      window.location.href = data.url as string;
+    } catch (e) {
+      setCheckoutErr(e instanceof Error ? e.message : "Network error");
+      setCheckingOut(false);
+    }
+  }
 
   return (
     <>
@@ -92,12 +117,19 @@ export default function CartPage() {
                   TOTAL: ${total.toLocaleString()}
                 </div>
                 <button
-                  className="w-full border-4 border-ink bg-hot-pink px-4 py-4 font-[family-name:var(--font-bangers)] text-2xl tracking-widest text-paper shadow-graffiti hover:-translate-y-1 transition-transform"
-                  onClick={() => alert("Checkout via Stripe coming in Phase 3 — your art is safe in the cart 🎨")}
+                  disabled={checkingOut}
+                  onClick={checkout}
+                  className="flex w-full items-center justify-center gap-2 border-4 border-ink bg-hot-pink px-4 py-4 font-[family-name:var(--font-bangers)] text-2xl tracking-widest text-paper shadow-graffiti hover:-translate-y-1 transition-transform disabled:opacity-50"
                 >
-                  CHECKOUT 💸
+                  {checkingOut ? <Loader2 className="h-6 w-6 animate-spin" /> : null}
+                  {checkingOut ? "REDIRECTING..." : "CHECKOUT 💸"}
                 </button>
-                <p className="mt-3 text-xs">Stripe Connect coming next phase. Artists get paid direct.</p>
+                {checkoutErr && (
+                  <p className="mt-2 border-2 border-ink bg-blood-orange p-2 font-[family-name:var(--font-bangers)] text-paper">
+                    {checkoutErr}
+                  </p>
+                )}
+                <p className="mt-3 text-xs">Secure checkout via Stripe. Artists get paid direct.</p>
               </aside>
             </div>
           )}

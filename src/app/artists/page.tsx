@@ -1,10 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Header, Footer } from "@/components/chrome";
-import { ARTISTS } from "@/lib/data";
+import { fetchArtists } from "@/lib/repo";
 import { MapPin } from "lucide-react";
 
-export default function ArtistsIndexPage() {
+export const revalidate = 60;
+
+export default async function ArtistsIndexPage() {
+  const artists = await fetchArtists();
+
   return (
     <>
       <Header />
@@ -16,7 +20,7 @@ export default function ArtistsIndexPage() {
           </h1>
 
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-            {ARTISTS.map((a, i) => (
+            {artists.map((a, i) => (
               <Link
                 key={a.id}
                 href={`/artists/${a.id}`}

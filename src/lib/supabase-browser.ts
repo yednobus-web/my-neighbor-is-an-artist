@@ -1,0 +1,12 @@
+// Browser-side Supabase client. Safe to import from client components.
+import { createBrowserClient } from "@supabase/ssr";
+
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+export function createSupabaseBrowser() {
+  if (!isSupabaseConfigured) return null;
+  return createBrowserClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+}

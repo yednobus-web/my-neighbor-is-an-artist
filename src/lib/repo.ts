@@ -21,6 +21,8 @@ type DBArtist = {
   country_flag: string | null;
   vibe: string[] | null;
   followers: number | null;
+  lat: number | null;
+  lng: number | null;
 };
 
 type DBArtwork = {
@@ -54,6 +56,8 @@ function dbToArtist(a: DBArtist): Artist {
     avatar: a.avatar_url ?? "",
     followers: a.followers ?? 0,
     vibe: a.vibe ?? [],
+    lat: a.lat ?? 0,
+    lng: a.lng ?? 0,
   };
 }
 

@@ -3,13 +3,16 @@ import Image from "next/image";
 import { Header, Footer } from "@/components/chrome";
 import { NeighborhoodSearch } from "@/components/neighborhood-search";
 import { ArtworkCard } from "@/components/artwork-card";
-import { ARTISTS, ARTWORKS, uniqueNeighborhoods } from "@/lib/data";
+import { fetchArtists, fetchArtworks } from "@/lib/repo";
 import { Sparkles, Zap, Globe, Heart, ArrowRight } from "lucide-react";
 
-export default function HomePage() {
-  const featured = ARTWORKS.slice(0, 8);
-  const neighborhoods = uniqueNeighborhoods();
-  const featuredArtists = ARTISTS.slice(0, 6);
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
+  const featured = artworks.slice(0, 8);
+  const neighborhoods = Array.from(new Set(artists.map((a) => `${a.neighborhood}, ${a.city}`))).sort();
+  const featuredArtists = artists.slice(0, 6);
 
   return (
     <>
@@ -118,7 +121,12 @@ export default function HomePage() {
 
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {featured.map((w, i) => (
-                <ArtworkCard key={w.id} artwork={w} index={i} />
+                <ArtworkCard
+                  key={w.id}
+                  artwork={w}
+                  index={i}
+                  artist={artists.find((a) => a.id === w.artistId) ?? null}
+                />
               ))}
             </div>
 

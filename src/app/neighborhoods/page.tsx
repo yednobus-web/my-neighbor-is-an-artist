@@ -1,21 +1,26 @@
 import Link from "next/link";
 import { Header, Footer } from "@/components/chrome";
-import { ARTISTS, ARTWORKS, getArtist } from "@/lib/data";
+import { fetchArtists, fetchArtworks } from "@/lib/repo";
 
-export default function NeighborhoodsPage() {
-  const grouped = new Map<string, { city: string; country: string; flag: string; count: number }>();
-  ARTWORKS.forEach((w) => {
-    const a = getArtist(w.artistId)!;
-    const key = `${a.neighborhood}|${a.city}|${a.country}|${a.countryFlag}`;
-    const cur = grouped.get(key) ?? { city: a.city, country: a.country, flag: a.countryFlag, count: 0 };
+export const revalidate = 60;
+
+export default async function NeighborhoodsPage() {
+  const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
+  const byArtist = new Map(artists.map((a) => [a.id, a]));
+
+  const grouped = new Map<string, { city: string; country: string; flag: string; count: number; neighborhood: string }>();
+  artworks.forEach((w) => {
+    const a = byArtist.get(w.artistId);
+    if (!a) return;
+    const neighborhood = w.neighborhood ?? a.neighborhood;
+    const city = w.city ?? a.city;
+    const key = `${neighborhood}|${city}|${a.country}|${a.countryFlag}`;
+    const cur = grouped.get(key) ?? { neighborhood, city, country: a.country, flag: a.countryFlag, count: 0 };
     cur.count++;
     grouped.set(key, cur);
   });
 
-  const blocks = Array.from(grouped.entries()).map(([key, v]) => ({
-    neighborhood: key.split("|")[0],
-    ...v,
-  }));
+  const blocks = Array.from(grouped.values());
 
   // group by country
   const byCountry = new Map<string, typeof blocks>();
@@ -92,5 +97,3 @@ export default function NeighborhoodsPage() {
     </>
   );
 }
-
-void ARTISTS; // keep import for future expansion
