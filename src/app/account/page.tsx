@@ -1,8 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Header, Footer } from "@/components/chrome";
 import { createSupabaseServer, isSupabaseConfigured } from "@/lib/supabase";
 import { signOut } from "@/app/(auth)/actions";
+import { User, Pencil, Sparkles } from "lucide-react";
 
 export default async function AccountPage() {
   if (!isSupabaseConfigured) {
@@ -15,7 +17,7 @@ export default async function AccountPage() {
               ACCOUNT — DEMO MODE
             </h1>
             <p className="mt-2">
-              Auth isn't connected yet. See <Link href="/" className="underline">SETUP.md</Link> in the repo to wire up Supabase.
+              Auth isn&apos;t connected yet. See <Link href="/" className="underline">SETUP.md</Link> in the repo to wire up Supabase.
             </p>
           </div>
         </main>
@@ -32,7 +34,7 @@ export default async function AccountPage() {
   // Look up linked artist profile (if any)
   const { data: artist } = await sb
     .from("artists")
-    .select("id, handle, name, neighborhood, city, country, country_flag, stripe_account_id")
+    .select("id, handle, name, bio, avatar_url, neighborhood, city, country, country_flag, vibe, stripe_account_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -53,7 +55,7 @@ export default async function AccountPage() {
           <section className="-rotate-1 border-4 border-paper bg-paper p-6 text-ink shadow-graffiti-lg">
             <p className="font-[family-name:var(--font-marker)] text-xl text-electric-purple">your account</p>
             <h1 className="font-[family-name:var(--font-bangers)] text-5xl leading-none tracking-wide">
-              {user.email?.split("@")[0]?.toUpperCase() ?? "ANON"}
+              {(artist?.name || user.email?.split("@")[0] || "ANON").toUpperCase()}
             </h1>
             <p className="mt-1 text-sm">{user.email}</p>
             <div className="mt-4 flex flex-wrap gap-3">
@@ -76,26 +78,58 @@ export default async function AccountPage() {
             <h2 className="font-[family-name:var(--font-bangers)] text-3xl tracking-widest">
               ARTIST PROFILE
             </h2>
+
             {artist ? (
-              <div className="mt-3 space-y-1">
-                <p className="font-[family-name:var(--font-marker)] text-2xl text-electric-purple">{artist.handle}</p>
-                <p className="text-sm">
-                  {artist.neighborhood}, {artist.city} {artist.country_flag}
-                </p>
-                <div className="mt-3 flex gap-3">
+              <div className="mt-3">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-ink bg-paper shadow-graffiti">
+                    {artist.avatar_url ? (
+                      <Image src={artist.avatar_url} alt={artist.name} fill sizes="96px" className="object-cover" unoptimized />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <User className="h-12 w-12 text-ink/40" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-[family-name:var(--font-marker)] text-2xl text-electric-purple">{artist.handle}</p>
+                    {artist.bio && <p className="mt-1 text-sm">{artist.bio}</p>}
+                    <p className="mt-1 text-sm">
+                      {artist.neighborhood}, {artist.city} {artist.country_flag}
+                    </p>
+                    {artist.vibe && artist.vibe.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {artist.vibe.map((v: string) => (
+                          <span key={v} className="border-2 border-ink bg-paper px-2 py-0.5 font-[family-name:var(--font-bangers)] text-xs tracking-widest">
+                            {v.toUpperCase()}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    href="/account/profile"
+                    className="inline-flex items-center gap-1 border-4 border-ink bg-cyber-cyan px-4 py-2 font-[family-name:var(--font-bangers)] tracking-widest text-ink shadow-graffiti hover:-translate-y-1 transition-transform"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    EDIT PROFILE
+                  </Link>
                   <Link
                     href={`/artists/${artist.id}`}
-                    className="border-2 border-ink bg-paper px-3 py-1 font-[family-name:var(--font-bangers)] tracking-widest"
+                    className="border-4 border-ink bg-paper px-4 py-2 font-[family-name:var(--font-bangers)] tracking-widest shadow-graffiti hover:-translate-y-1 transition-transform"
                   >
-                    VIEW PROFILE
+                    VIEW PUBLIC PROFILE
                   </Link>
                   {artist.stripe_account_id ? (
-                    <span className="border-2 border-ink bg-cyber-cyan px-3 py-1 font-[family-name:var(--font-bangers)] tracking-widest">
+                    <span className="border-4 border-ink bg-electric-purple px-4 py-2 font-[family-name:var(--font-bangers)] tracking-widest text-paper shadow-graffiti">
                       ✓ STRIPE LINKED
                     </span>
                   ) : (
                     <form action="/api/stripe/connect" method="post">
-                      <button className="border-2 border-ink bg-sun-yellow px-3 py-1 font-[family-name:var(--font-bangers)] tracking-widest">
+                      <button className="border-4 border-ink bg-sun-yellow px-4 py-2 font-[family-name:var(--font-bangers)] tracking-widest text-ink shadow-graffiti hover:-translate-y-1 transition-transform">
                         CONNECT STRIPE → GET PAID
                       </button>
                     </form>
@@ -103,10 +137,18 @@ export default async function AccountPage() {
                 </div>
               </div>
             ) : (
-              <p className="mt-2 text-sm">
-                No artist profile yet. List your first piece on{" "}
-                <Link href="/sell" className="underline">/sell</Link> and we'll create one.
-              </p>
+              <div className="mt-3">
+                <p className="text-sm">
+                  No artist profile yet. Set one up so buyers can find you, then drop your first piece.
+                </p>
+                <Link
+                  href="/account/profile"
+                  className="mt-4 inline-flex items-center gap-2 border-4 border-ink bg-hot-pink px-5 py-3 font-[family-name:var(--font-bangers)] text-xl tracking-widest text-paper shadow-graffiti hover:-translate-y-1 transition-transform"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  SET UP ARTIST PROFILE →
+                </Link>
+              </div>
             )}
           </section>
 
