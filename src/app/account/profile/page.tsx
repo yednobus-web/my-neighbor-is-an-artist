@@ -32,7 +32,7 @@ export default async function ProfileEditPage() {
   // Existing artist row (if any).
   const { data: artist } = await sb
     .from("artists")
-    .select("id, handle, name, bio, avatar_url, city, neighborhood, country, country_flag, vibe")
+    .select("id, handle, name, bio, avatar_url, city, neighborhood, country, vibe")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -50,7 +50,6 @@ export default async function ProfileEditPage() {
     city: artist?.city ?? "",
     neighborhood: artist?.neighborhood ?? "",
     country: artist?.country ?? "",
-    countryFlag: artist?.country_flag ?? "",
     vibe: (artist?.vibe ?? []).join(", "),
   };
 

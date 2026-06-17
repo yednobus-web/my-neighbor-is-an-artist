@@ -38,7 +38,8 @@ export async function saveProfileAction(
   const city = (formData.get("city") as string)?.trim();
   const neighborhood = (formData.get("neighborhood") as string)?.trim();
   const country = (formData.get("country") as string)?.trim();
-  const countryFlag = (formData.get("countryFlag") as string)?.trim();
+  // countryFlag is set automatically by the CountryDropdown as a hidden input.
+  const countryFlag = (formData.get("countryFlag") as string)?.trim() || "🌍";
   const avatarUrl = (formData.get("avatarUrl") as string)?.trim();
   const vibeStr = (formData.get("vibe") as string) ?? "";
   const vibe = vibeStr.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
