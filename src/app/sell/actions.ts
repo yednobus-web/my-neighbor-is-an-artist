@@ -10,12 +10,7 @@ export type ListArtworkResult = {
 };
 
 function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
 export async function listArtworkAction(
@@ -23,24 +18,27 @@ export async function listArtworkAction(
   formData: FormData,
 ): Promise<ListArtworkResult> {
   const title = (formData.get("title") as string)?.trim();
-  const artistHandle = (formData.get("artistHandle") as string)?.trim();
-  const artistName = (formData.get("artistName") as string)?.trim();
   const city = (formData.get("city") as string)?.trim();
   const neighborhood = (formData.get("neighborhood") as string)?.trim();
   const country = (formData.get("country") as string)?.trim();
+  const countryFlag = (formData.get("countryFlag") as string)?.trim() || "🌍";
   const priceStr = (formData.get("price") as string)?.trim();
+  const currency = (formData.get("currency") as string)?.trim() || "USD";
   const medium = (formData.get("medium") as string)?.trim();
+  const style = (formData.get("style") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
   const imageUrl = (formData.get("imageUrl") as string)?.trim();
   const latStr = (formData.get("lat") as string)?.trim();
   const lngStr = (formData.get("lng") as string)?.trim();
+  const measurementUnit = (formData.get("measurementUnit") as string)?.trim() || "cm";
+  const widthStr = (formData.get("width") as string)?.trim();
+  const heightStr = (formData.get("height") as string)?.trim();
+  const depthStr = (formData.get("depth") as string)?.trim();
   const tags = ((formData.get("tags") as string) ?? "")
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
+    .split(",").map((t) => t.trim()).filter(Boolean);
 
-  if (!title || !artistHandle || !city || !neighborhood || !priceStr || !imageUrl) {
-    return { ok: false, message: "Fill out title, artist handle, city, neighborhood, price, and image." };
+  if (!title || !city || !neighborhood || !priceStr || !imageUrl) {
+    return { ok: false, message: "Fill out title, city, state/region, price, and image." };
   }
   const price = Number(priceStr);
   if (Number.isNaN(price) || price <= 0) {
@@ -48,42 +46,48 @@ export async function listArtworkAction(
   }
   const lat = latStr ? Number(latStr) : null;
   const lng = lngStr ? Number(lngStr) : null;
+  const width = widthStr ? Number(widthStr) : null;
+  const height = heightStr ? Number(heightStr) : null;
+  const depth = depthStr ? Number(depthStr) : null;
 
   if (!isSupabaseConfigured) {
     return {
       ok: false,
-      message:
-        "Demo mode: Supabase isn't connected yet. Once env vars are set + the schema is run, this form writes to the database.",
+      message: "Demo mode: Supabase isn't connected yet. See SETUP.md to wire it up.",
     };
   }
 
   const sb = await createSupabaseServer();
-  if (!sb) {
-    return { ok: false, message: "Couldn't reach Supabase. Try again in a moment." };
-  }
+  if (!sb) return { ok: false, message: "Couldn't reach Supabase. Try again." };
 
   const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    return { ok: false, message: "You need to be signed in to list art. Sign in first." };
+  }
 
-  // Find or create the artist by handle.
-  const { data: existing } = await sb
+  // Use the signed-in user's existing artist profile.
+  const { data: existingArtist } = await sb
     .from("artists")
-    .select("id, user_id")
-    .eq("handle", artistHandle)
+    .select("id")
+    .eq("user_id", user.id)
     .maybeSingle();
 
-  let artistId = existing?.id as string | undefined;
+  let artistId = existingArtist?.id as string | undefined;
 
   if (!artistId) {
+    // No profile yet — create a minimal one so the artwork can be linked.
+    // The artist is prompted to fill in their full profile from /account.
+    const emailHandle = `@${user.email?.split("@")[0]?.toLowerCase().replace(/[^a-z0-9._-]/g, "") ?? "artist"}`;
     const { data: created, error: artistErr } = await sb
       .from("artists")
       .insert({
-        user_id: user?.id ?? null,
-        handle: artistHandle,
-        name: artistName || artistHandle.replace(/^@/, ""),
+        user_id: user.id,
+        handle: emailHandle,
+        name: emailHandle.replace(/^@/, ""),
         city,
         neighborhood,
         country: country || "Earth",
-        country_flag: "🌍",
+        country_flag: countryFlag,
         lat,
         lng,
       })
@@ -91,12 +95,9 @@ export async function listArtworkAction(
       .single();
 
     if (artistErr || !created) {
-      return { ok: false, message: `Couldn't create artist: ${artistErr?.message ?? "unknown error"}` };
+      return { ok: false, message: `Couldn't set up your artist profile: ${artistErr?.message ?? "unknown error"}` };
     }
     artistId = created.id;
-  } else if (user && existing && !existing.user_id) {
-    // Claim profile if it was orphaned and the handle matches a logged-in user.
-    await sb.from("artists").update({ user_id: user.id }).eq("id", existing.id);
   }
 
   const slug = `${slugify(title)}-${Date.now().toString(36).slice(-4)}`;
@@ -107,13 +108,19 @@ export async function listArtworkAction(
     title,
     description: description || null,
     medium: medium || null,
+    style: style || null,
     price,
+    currency,
     image_url: imageUrl,
     tags,
     city: city || null,
     neighborhood: neighborhood || null,
     lat,
     lng,
+    width_cm: width,
+    height_cm: height,
+    depth_cm: depth,
+    measurement_unit: measurementUnit,
   });
 
   if (workErr) {
