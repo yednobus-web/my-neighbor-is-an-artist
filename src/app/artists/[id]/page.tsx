@@ -68,13 +68,15 @@ export default async function ArtistPage({
                   );
                 })}
               </div>
-              <div className="mt-4 flex gap-3">
-                <button className="border-4 border-ink bg-acid-lime px-4 py-2 font-[family-name:var(--font-bangers)] tracking-widest shadow-graffiti">
-                  FOLLOW · {artist.followers.toLocaleString()}
-                </button>
-                <button className="border-4 border-ink bg-paper px-4 py-2 font-[family-name:var(--font-bangers)] tracking-widest shadow-graffiti hover:bg-cyber-cyan">
-                  MESSAGE
-                </button>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <div className="border-4 border-ink bg-acid-lime px-4 py-2 shadow-graffiti">
+                  <span className="font-[family-name:var(--font-bangers)] text-2xl tracking-widest">
+                    {works.length}
+                  </span>
+                  <span className="ml-2 font-[family-name:var(--font-bangers)] tracking-widest">
+                    {works.length === 1 ? "PIECE ON THE WALL" : "PIECES ON THE WALL"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
