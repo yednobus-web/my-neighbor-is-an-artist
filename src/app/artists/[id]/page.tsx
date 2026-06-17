@@ -4,14 +4,10 @@ import { notFound } from "next/navigation";
 import { Header, Footer } from "@/components/chrome";
 import { ArtworkCard } from "@/components/artwork-card";
 import { fetchArtists, fetchArtworks } from "@/lib/repo";
-import { ARTISTS } from "@/lib/data";
 import { MapPin } from "lucide-react";
 
 export const revalidate = 60;
-
-export function generateStaticParams() {
-  return ARTISTS.map((a) => ({ id: a.id }));
-}
+export const dynamicParams = true;
 
 export default async function ArtistPage({
   params,

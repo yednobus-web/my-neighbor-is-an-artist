@@ -6,15 +6,10 @@ import { ArtworkCard } from "@/components/artwork-card";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { BuyNowButton } from "@/components/buy-now-button";
 import { fetchArtists, fetchArtworkBySlug, fetchArtworks } from "@/lib/repo";
-import { ARTWORKS } from "@/lib/data";
 import { MapPin, Heart, Share2, Truck, Shield } from "lucide-react";
 
 export const revalidate = 60;
-
-export function generateStaticParams() {
-  // Mock slugs at build time. Real DB slugs are served via dynamic rendering.
-  return ARTWORKS.map((w) => ({ slug: w.slug }));
-}
+export const dynamicParams = true;
 
 export default async function ArtworkPage({
   params,
