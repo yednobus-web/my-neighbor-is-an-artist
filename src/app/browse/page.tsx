@@ -13,7 +13,13 @@ export default async function BrowsePage({ searchParams }: { searchParams: SP })
   const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
   const byArtist = new Map(artists.map((a) => [a.id, a]));
 
-  const allTags = Array.from(new Set(artworks.flatMap((w) => w.tags))).sort();
+  // Count tag frequency across all artworks, keep top 30 by usage.
+  const tagFreq = new Map<string, number>();
+  artworks.forEach((w) => w.tags.forEach((t) => tagFreq.set(t, (tagFreq.get(t) ?? 0) + 1)));
+  const allTags = Array.from(tagFreq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30)
+    .map(([t]) => t);
   const neighborhoods = Array.from(new Set(artists.map((a) => `${a.neighborhood}, ${a.city}`))).sort();
 
   let results = artworks.filter((w) => {
