@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Header, Footer } from "@/components/chrome";
 import { fetchArtists, fetchArtworks } from "@/lib/repo";
+import { createSupabaseServer, isSupabaseConfigured } from "@/lib/supabase";
 import { NeighborhoodMapClient } from "./neighborhood-map-client";
 import type { NeighborhoodPin } from "./neighborhood-map";
 
@@ -9,6 +10,25 @@ export const revalidate = 60;
 export default async function NeighborhoodsPage() {
   const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
   const byArtist = new Map(artists.map((a) => [a.id, a]));
+
+  // ── Detect logged-in user's neighborhood ──────────────────────────────────
+  let userPinKey: string | null = null;
+  if (isSupabaseConfigured) {
+    const sb = await createSupabaseServer();
+    if (sb) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        const { data: artistRow } = await sb
+          .from("artists")
+          .select("neighborhood, city")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (artistRow) {
+          userPinKey = `${artistRow.neighborhood}|${artistRow.city}`;
+        }
+      }
+    }
+  }
 
   // Build neighborhood clusters: aggregate pieces + artists + average lat/lng
   type Cluster = {
@@ -96,7 +116,7 @@ export default async function NeighborhoodsPage() {
           </p>
 
           {/* ── BIG MAP ── */}
-          <NeighborhoodMapClient pins={pins} />
+          <NeighborhoodMapClient pins={pins} userKey={userPinKey} />
 
           <p className="mb-10 mt-3 text-xs text-paper/50">
             {pins.filter((p) => p.lat !== 0 || p.lng !== 0).length} neighborhoods pinned ·{" "}
