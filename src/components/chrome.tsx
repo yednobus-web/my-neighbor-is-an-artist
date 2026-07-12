@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, Search, User } from "lucide-react";
 import { CartLink } from "./cart-link";
+import { MobileMenu } from "./mobile-menu";
 
 export function Header() {
   return (
@@ -42,6 +43,7 @@ export function Header() {
           >
             <User className="h-5 w-5" />
           </Link>
+          <MobileMenu />
         </div>
       </div>
 
