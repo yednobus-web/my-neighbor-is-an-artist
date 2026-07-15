@@ -22,42 +22,42 @@ export default async function HomePage() {
       <Header />
       <main>
         {/* ── HERO ── */}
-        <section className="relative overflow-hidden bg-[var(--color-canvas-3)]">
+        <section className="hero-gradient relative overflow-hidden">
           <div className="mx-auto grid max-w-7xl px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-24">
             <div className="flex flex-col justify-center">
-              <p className="mb-3 text-sm font-medium uppercase tracking-widest text-[var(--color-hot-pink)]">
+              <p className="mb-3 inline-block w-fit rounded-full bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-widest text-[var(--color-hot-pink)] shadow-sm">
                 Global Art Marketplace
               </p>
-              <h1 className="font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide text-[var(--color-ink)] sm:text-7xl lg:text-8xl">
+              <h1 className="font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide text-white sm:text-7xl lg:text-8xl" style={{ textShadow: "3px 3px 0 rgba(0,0,0,0.15)" }}>
                 ART FROM<br />
                 YOUR<br />
-                <span style={{ color: "var(--color-hot-pink)" }}>NEIGHBOR</span>
+                <span className="text-black">NEIGHBOR</span>
               </h1>
-              <p className="mt-6 max-w-md text-base text-[var(--color-ink-2)] leading-relaxed">
+              <p className="mt-6 max-w-md text-base font-medium text-white leading-relaxed drop-shadow-sm">
                 Discover original art from real artists in real neighborhoods around the world.
                 Buy direct. Support the scene. No gallery markup.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/browse" className="btn-primary">
+                <Link href="/browse" className="inline-flex items-center gap-2 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-black">
                   Browse All Art <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="/neighborhoods" className="btn-outline">
+                <Link href="/neighborhoods" className="inline-flex items-center gap-2 bg-white/90 px-6 py-3 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-white">
                   Explore by Neighborhood
                 </Link>
               </div>
-              <div className="mt-8 flex items-center gap-6 text-sm text-[var(--color-ink-3)]">
+              <div className="mt-8 flex items-center gap-6 text-sm text-white drop-shadow-sm">
                 <div>
-                  <span className="block text-2xl font-bold text-[var(--color-ink)]">{artworks.length}+</span>
+                  <span className="block text-2xl font-bold">{artworks.length}+</span>
                   <span>Artworks</span>
                 </div>
-                <div className="h-8 w-px bg-[var(--color-border)]" />
+                <div className="h-8 w-px bg-white/40" />
                 <div>
-                  <span className="block text-2xl font-bold text-[var(--color-ink)]">{artists.length}+</span>
+                  <span className="block text-2xl font-bold">{artists.length}+</span>
                   <span>Artists</span>
                 </div>
-                <div className="h-8 w-px bg-[var(--color-border)]" />
+                <div className="h-8 w-px bg-white/40" />
                 <div>
-                  <span className="block text-2xl font-bold text-[var(--color-ink)]">90%</span>
+                  <span className="block text-2xl font-bold">90%</span>
                   <span>To artist</span>
                 </div>
               </div>
@@ -66,7 +66,7 @@ export default async function HomePage() {
             {/* Hero image mosaic */}
             <div className="mt-12 hidden grid-cols-2 gap-3 lg:mt-0 lg:grid">
               {artworks.slice(0, 4).map((w, i) => (
-                <Link key={w.id} href={`/art/${w.slug}`} className="group overflow-hidden rounded-sm">
+                <Link key={w.id} href={`/art/${w.slug}`} className="group overflow-hidden rounded-sm shadow-xl ring-4 ring-white/30">
                   <div
                     className="relative overflow-hidden bg-[var(--color-canvas-3)]"
                     style={{ aspectRatio: i % 3 === 0 ? "3/4" : "4/5" }}

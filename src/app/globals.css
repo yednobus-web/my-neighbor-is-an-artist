@@ -160,9 +160,45 @@
     border-bottom: 1px solid var(--color-border);
   }
 
+  /* Vibrant animated header — inspired by abstract multicolor art */
+  .vibrant-header {
+    background: linear-gradient(
+      100deg,
+      #e8175d 0%,
+      #e84c1e 18%,
+      #f5a623 36%,
+      #8dc63f 54%,
+      #00a3c4 72%,
+      #7b2d8b 90%,
+      #e8175d 100%
+    );
+    background-size: 250% 100%;
+    animation: header-shift 18s ease infinite;
+  }
+  @keyframes header-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Hero gradient — same vibrant palette, richer for the big top section */
+  .hero-gradient {
+    background: linear-gradient(
+      120deg,
+      #e8175d 0%,
+      #e84c1e 25%,
+      #f5a623 45%,
+      #8dc63f 65%,
+      #00a3c4 82%,
+      #7b2d8b 100%
+    );
+    background-size: 200% 200%;
+    animation: header-shift 22s ease infinite;
+  }
+
   /* Marquee — kept for fun strip */
   .marquee {
-    animation: marquee 35s linear infinite;
+    animation: marquee 30s linear infinite;
   }
   @keyframes marquee {
     from { transform: translateX(0); }

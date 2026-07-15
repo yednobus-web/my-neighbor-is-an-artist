@@ -1,68 +1,105 @@
+"use client";
+
 import Link from "next/link";
-import { Search, User, MapPin, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Search, MapPin, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { CartLink } from "./cart-link";
+import { AuthButton } from "./auth-button";
 import { MobileMenu } from "./mobile-menu";
 
 export function Header() {
-  return (
-    <header className="sticky top-0 z-50 bg-white">
-      {/* Announcement bar */}
-      <div className="announcement-bar">
-        🎨 Free shipping on orders over $200 · Artists keep 90% · New drops daily
-      </div>
+  const router = useRouter();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [q, setQ] = useState("");
 
-      {/* Main header */}
-      <div className="border-b border-[var(--color-border)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const query = q.trim();
+    router.push(query ? `/browse?loc=${encodeURIComponent(query)}` : "/browse");
+    setSearchOpen(false);
+  }
+
+  return (
+    <header className="sticky top-0 z-50">
+      {/* ── Vibrant gradient bar ── */}
+      <div className="vibrant-header">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex flex-col leading-none">
-            <span
-              className="font-[family-name:var(--font-marker)] text-[var(--color-hot-pink)]"
-              style={{ fontSize: "1.1rem" }}
-            >
+            <span className="font-[family-name:var(--font-marker)] text-lg text-white drop-shadow-sm">
               my neighbor
             </span>
             <span
-              className="font-[family-name:var(--font-display)] tracking-widest text-[var(--color-ink)]"
-              style={{ fontSize: "1.3rem", letterSpacing: "0.08em" }}
+              className="font-[family-name:var(--font-display)] text-2xl tracking-widest text-white drop-shadow-sm"
+              style={{ letterSpacing: "0.06em" }}
             >
               IS AN ARTIST
             </span>
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-6 text-sm font-medium text-[var(--color-ink-2)] md:flex">
-            <Link href="/browse" className="hover:text-[var(--color-ink)] transition-colors">Browse</Link>
-            <Link href="/map" className="hover:text-[var(--color-ink)] transition-colors">Map</Link>
-            <Link href="/neighborhoods" className="hover:text-[var(--color-ink)] transition-colors">Neighborhoods</Link>
-            <Link href="/artists" className="hover:text-[var(--color-ink)] transition-colors">Artists</Link>
-            <Link
-              href="/sell"
-              className="btn-primary text-xs px-4 py-2"
-            >
-              Sell Your Art
-            </Link>
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-white lg:flex">
+            <Link href="/neighborhoods?mine=1" className="drop-shadow-sm hover:text-black/80 transition-colors">My Neighborhood</Link>
+            <Link href="/neighborhoods" className="drop-shadow-sm hover:text-black/80 transition-colors">Other Neighborhoods</Link>
+            <Link href="/artists" className="drop-shadow-sm hover:text-black/80 transition-colors">Artists</Link>
+            <Link href="/sell" className="drop-shadow-sm hover:text-black/80 transition-colors">Sell Your Art</Link>
           </nav>
 
-          {/* Right icons */}
-          <div className="flex items-center gap-1">
-            <Link
-              href="/browse"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-2)] transition-colors"
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSearchOpen((v) => !v)}
               aria-label="Search"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] shadow-sm transition hover:bg-white"
             >
-              <Search className="h-4 w-4" />
-            </Link>
+              {searchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+            </button>
             <CartLink />
-            <Link
-              href="/account"
-              className="hidden h-9 w-9 items-center justify-center rounded-full text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-2)] transition-colors sm:flex"
-              aria-label="Account"
-            >
-              <User className="h-4 w-4" />
-            </Link>
+            <AuthButton />
             <MobileMenu />
           </div>
+        </div>
+
+        {/* Search dropdown */}
+        {searchOpen && (
+          <div className="border-t border-white/20 bg-black/10 px-4 py-3 sm:px-6">
+            <form onSubmit={submitSearch} className="mx-auto flex max-w-7xl items-center gap-2">
+              <div className="flex flex-1 items-center bg-white">
+                <MapPin className="ml-3 h-4 w-4 shrink-0 text-[var(--color-ink-3)]" />
+                <input
+                  autoFocus
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search by neighborhood, city, or country…"
+                  className="flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:outline-none"
+                />
+                <button type="submit" className="bg-[var(--color-ink)] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-[var(--color-hot-pink)]">
+                  Search
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+
+      {/* ── Running marquee ── */}
+      <div className="overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-ink)] py-1.5">
+        <div className="marquee flex w-max whitespace-nowrap text-xs font-bold uppercase tracking-widest text-white">
+          {Array.from({ length: 2 }).map((_, j) => (
+            <span key={j} className="flex">
+              {[
+                "🔥 New drops daily",
+                "🎨 Support your local artist",
+                "🌍 Art from every neighborhood",
+                "✊ No middleman",
+                "💸 Artists keep 90%",
+                "🛹 Buy the block",
+              ].map((s, i) => (
+                <span key={i} className="mx-6">{s}</span>
+              ))}
+            </span>
+          ))}
         </div>
       </div>
     </header>
@@ -95,8 +132,8 @@ export function Footer() {
           <div>
             <h4 className="filter-group-title">Explore</h4>
             <ul className="space-y-2 text-sm text-[var(--color-ink-2)]">
-              <li><Link href="/browse" className="hover:text-[var(--color-ink)]">Browse Art</Link></li>
-              <li><Link href="/neighborhoods" className="hover:text-[var(--color-ink)]">Neighborhoods</Link></li>
+              <li><Link href="/neighborhoods?mine=1" className="hover:text-[var(--color-ink)]">My Neighborhood</Link></li>
+              <li><Link href="/neighborhoods" className="hover:text-[var(--color-ink)]">Other Neighborhoods</Link></li>
               <li><Link href="/map" className="hover:text-[var(--color-ink)]">World Map</Link></li>
               <li><Link href="/artists" className="hover:text-[var(--color-ink)]">Artists</Link></li>
             </ul>

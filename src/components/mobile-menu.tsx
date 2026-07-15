@@ -6,12 +6,11 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/browse", label: "Browse" },
-  { href: "/map", label: "Map" },
-  { href: "/neighborhoods", label: "Neighborhoods" },
+  { href: "/neighborhoods?mine=1", label: "My Neighborhood" },
+  { href: "/neighborhoods", label: "Other Neighborhoods" },
   { href: "/artists", label: "Artists" },
   { href: "/sell", label: "Sell Your Art" },
-  { href: "/account", label: "My Account" },
+  { href: "/account", label: "My Profile" },
 ];
 
 export function MobileMenu() {
@@ -29,20 +28,20 @@ export function MobileMenu() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close menu" : "Open menu"}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-2)] transition-colors md:hidden"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] shadow-sm transition hover:bg-white lg:hidden"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
       <nav
-        className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-white shadow-2xl transition-transform duration-300 md:hidden ${
+        className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-white shadow-2xl transition-transform duration-300 lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
