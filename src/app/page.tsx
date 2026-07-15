@@ -7,81 +7,107 @@ import { ArrowRight, MapPin } from "lucide-react";
 
 export const revalidate = 60;
 
+const CATEGORY_TILES = [
+  { label: "PHOTOGRAPHY", tag: "photo" },
+  { label: "GRAPHICS", tag: "digital" },
+  { label: "PAINTINGS", tag: "painting" },
+  { label: "SCULPTURES", tag: "sculpture" },
+];
+
 export default async function HomePage() {
   const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
   const featured = artworks.slice(0, 8);
   const featuredArtists = artists.slice(0, 6);
+  const heroArt = artworks[0];
 
   // Neighborhood tiles — unique cities
   const cities = Array.from(
     new Map(artists.map((a) => [a.city, { city: a.city, flag: a.countryFlag, country: a.country }])).values()
   ).slice(0, 6);
 
+  // Pick an image for each category tile
+  const tileImages = artworks.slice(0, 4).map((w) => w.image);
+
   return (
     <>
       <Header />
-      <main>
-        {/* ── HERO ── */}
-        <section className="hero-gradient relative overflow-hidden">
-          <div className="mx-auto grid max-w-7xl px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-24">
-            <div className="flex flex-col justify-center">
-              <p className="mb-3 inline-block w-fit rounded-full bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-widest text-[var(--color-hot-pink)] shadow-sm">
-                Global Art Marketplace
-              </p>
-              <h1 className="font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide text-white sm:text-7xl lg:text-8xl" style={{ textShadow: "3px 3px 0 rgba(0,0,0,0.15)" }}>
-                ART FROM<br />
-                YOUR<br />
-                <span className="text-black">NEIGHBOR</span>
-              </h1>
-              <p className="mt-6 max-w-md text-base font-medium text-white leading-relaxed drop-shadow-sm">
-                Discover original art from real artists in real neighborhoods around the world.
-                Buy direct. Support the scene. No gallery markup.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/browse" className="inline-flex items-center gap-2 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-black">
-                  Browse All Art <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href="/neighborhoods" className="inline-flex items-center gap-2 bg-white/90 px-6 py-3 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-white">
-                  Explore by Neighborhood
-                </Link>
-              </div>
-              <div className="mt-8 flex items-center gap-6 text-sm text-white drop-shadow-sm">
-                <div>
-                  <span className="block text-2xl font-bold">{artworks.length}+</span>
-                  <span>Artworks</span>
-                </div>
-                <div className="h-8 w-px bg-white/40" />
-                <div>
-                  <span className="block text-2xl font-bold">{artists.length}+</span>
-                  <span>Artists</span>
-                </div>
-                <div className="h-8 w-px bg-white/40" />
-                <div>
-                  <span className="block text-2xl font-bold">90%</span>
-                  <span>To artist</span>
-                </div>
-              </div>
-            </div>
+      <main className="bg-white">
+        {/* ── HERO BANNER ── */}
+        <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+          <div className="relative overflow-hidden">
+            {/* Background artwork */}
+            <div className="relative h-[300px] w-full sm:h-[380px] lg:h-[440px]">
+              {heroArt && (
+                <Image
+                  src={heroArt.image}
+                  alt={heroArt.title}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="object-cover"
+                  unoptimized={!heroArt.image.includes("unsplash.com")}
+                />
+              )}
+              {/* Left fade for text legibility */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/40 to-transparent" />
 
-            {/* Hero image mosaic */}
-            <div className="mt-12 hidden grid-cols-2 gap-3 lg:mt-0 lg:grid">
-              {artworks.slice(0, 4).map((w, i) => (
-                <Link key={w.id} href={`/art/${w.slug}`} className="group overflow-hidden rounded-sm shadow-xl ring-4 ring-white/30">
-                  <div
-                    className="relative overflow-hidden bg-[var(--color-canvas-3)]"
-                    style={{ aspectRatio: i % 3 === 0 ? "3/4" : "4/5" }}
-                  >
-                    <Image
-                      src={w.image}
-                      alt={w.title}
-                      fill
-                      sizes="25vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
+              {/* Text overlay */}
+              <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 lg:px-16">
+                <p className="mb-2 text-xs font-medium italic text-[var(--color-ink-2)]">
+                  Browse Works For Sale
+                </p>
+                <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-wide text-[var(--color-ink)] sm:text-6xl lg:text-7xl">
+                  ART FROM<br />YOUR NEIGHBOR
+                </h1>
+                <p className="mt-3 max-w-sm text-sm text-[var(--color-ink-2)] leading-relaxed">
+                  Original art from real artists in real neighborhoods around the world.
+                  Buy direct — artists keep 90%.
+                </p>
+                <Link
+                  href="/browse"
+                  className="mt-6 inline-flex w-fit items-center gap-2 bg-black px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-[var(--color-hot-pink)]"
+                >
+                  Read More
                 </Link>
-              ))}
+              </div>
+
+              {/* Carousel dots (decorative) */}
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+                <span className="h-2 w-2 rounded-full bg-[var(--color-ink)]" />
+                <span className="h-2 w-2 rounded-full bg-[var(--color-ink)]/30" />
+                <span className="h-2 w-2 rounded-full bg-[var(--color-ink)]/30" />
+              </div>
             </div>
+          </div>
+        </section>
+
+        {/* ── CATEGORY TILES ── */}
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {CATEGORY_TILES.map((cat, i) => (
+              <Link
+                key={cat.label}
+                href={`/browse?tag=${encodeURIComponent(cat.tag)}`}
+                className="group relative h-32 overflow-hidden sm:h-36"
+              >
+                {tileImages[i] && (
+                  <Image
+                    src={tileImages[i]}
+                    alt={cat.label}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    unoptimized={!tileImages[i].includes("unsplash.com")}
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/35 transition-colors group-hover:bg-black/25" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-[family-name:var(--font-display)] text-2xl tracking-widest text-white drop-shadow-md">
+                    {cat.label}
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
 
