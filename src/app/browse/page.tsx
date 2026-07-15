@@ -4,10 +4,10 @@ import { BrowseClient } from "./browse-client";
 
 export const revalidate = 60;
 
-type SP = Promise<{ q?: string }>;
+type SP = Promise<{ q?: string; view?: string }>;
 
 export default async function BrowsePage({ searchParams }: { searchParams: SP }) {
-  const { q } = await searchParams;
+  const { q, view } = await searchParams;
   const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
 
   const tagFreq = new Map<string, number>();
@@ -23,13 +23,13 @@ export default async function BrowsePage({ searchParams }: { searchParams: SP })
       <main className="bg-[var(--color-plaster)]">
         <div className="border-b border-[var(--color-border)] bg-[var(--color-linen)] px-4 py-6 sm:px-6">
           <div className="mx-auto max-w-7xl">
-            <p className="font-hand text-2xl text-[var(--color-clay)]">art from your neighborhood</p>
+            <p className="font-hand text-2xl text-[var(--color-clay)]">see your neighborhood dotted with art</p>
             <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)] sm:text-4xl">
               Browse Nearby
             </h1>
           </div>
         </div>
-        <BrowseClient artworks={artworks} artists={artists} topTags={topTags} initialQuery={q} />
+        <BrowseClient artworks={artworks} artists={artists} topTags={topTags} initialQuery={q} initialView={view} />
       </main>
       <Footer />
     </>
