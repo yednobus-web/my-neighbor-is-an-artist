@@ -5,9 +5,21 @@ import { HomeHero } from "@/components/home-hero";
 import { LocalFeed } from "@/components/local-feed";
 import { fetchArtists, fetchArtworks } from "@/lib/repo";
 import { PorchLight, isArtistActive } from "@/components/porch-light";
-import { MapPin, Search, HandHeart, Home as HomeIcon } from "lucide-react";
+import { MapPin, Home as HomeIcon } from "lucide-react";
 
 export const revalidate = 60;
+
+// Fixed marketplace categories (Yessy-style tile grid)
+const CATEGORIES = [
+  { label: "Paintings", tag: "painting" },
+  { label: "Photography", tag: "photo" },
+  { label: "Drawings & Illustration", tag: "illustration" },
+  { label: "Digital Art", tag: "digital" },
+  { label: "Sculpture", tag: "sculpture" },
+  { label: "Ceramics & Pottery", tag: "ceramics" },
+  { label: "Textile & Fiber", tag: "textile" },
+  { label: "Street & Graffiti", tag: "graffiti" },
+];
 
 export default async function HomePage() {
   const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
@@ -16,54 +28,74 @@ export default async function HomePage() {
     ? artworks.filter((w) => w.artistId === spotlight.id).slice(0, 3)
     : [];
 
+  // Pick a representative image per category (falls back to any artwork).
+  function imageForCategory(tag: string, i: number): string {
+    const match = artworks.find((w) =>
+      w.tags.some((t) => t.toLowerCase().includes(tag)) ||
+      (w.medium ?? "").toLowerCase().includes(tag),
+    );
+    return (match ?? artworks[i % Math.max(artworks.length, 1)])?.image ?? "";
+  }
+
   return (
     <>
       <Header />
       <main>
-        {/* Human hero */}
+        {/* Bold hero with search */}
         <HomeHero artworks={artworks} artists={artists} />
 
-        {/* Local preview grid */}
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <div className="mb-6 flex items-end justify-between">
-            <div>
-              <p className="font-hand text-2xl text-[var(--color-clay)]">fresh off the easel</p>
-              <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
-                Art from your neighborhood
-              </h2>
-            </div>
-            <Link href="/browse" className="btn-outline hidden sm:inline-flex">See all nearby</Link>
+        {/* ── CATEGORIES GRID ── */}
+        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+          <div className="mb-8 text-center">
+            <p className="font-hand text-2xl text-[var(--color-clay)]">what are you looking for?</p>
+            <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+              Browse by Category
+            </h2>
           </div>
-          <LocalFeed artworks={artworks} artists={artists} limit={8} />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {CATEGORIES.map((cat, i) => {
+              const img = imageForCategory(cat.tag, i);
+              return (
+                <Link
+                  key={cat.label}
+                  href={`/browse?q=${encodeURIComponent(cat.tag)}`}
+                  className="group relative h-40 overflow-hidden rounded-sm sm:h-44"
+                >
+                  {img && (
+                    <Image
+                      src={img}
+                      alt={cat.label}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      unoptimized={!img.includes("unsplash.com")}
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2a2622]/85 via-[#2a2622]/25 to-transparent transition-colors group-hover:from-[#2a2622]/70" />
+                  <div className="absolute inset-x-0 bottom-0 p-4">
+                    <span className="font-display text-lg font-semibold text-white drop-shadow">
+                      {cat.label}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
-        {/* How it works */}
-        <section className="bg-[var(--color-linen)] py-16">
+        {/* Local preview grid */}
+        <section className="bg-[var(--color-linen)] py-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="mb-10 text-center">
-              <p className="font-hand text-2xl text-[var(--color-clay)]">the whole idea</p>
-              <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
-                How it works
-              </h2>
+            <div className="mb-6 flex items-end justify-between">
+              <div>
+                <p className="font-hand text-2xl text-[var(--color-clay)]">fresh off the easel</p>
+                <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+                  Art from your neighborhood
+                </h2>
+              </div>
+              <Link href="/browse" className="btn-outline hidden sm:inline-flex">See all nearby</Link>
             </div>
-            <div className="grid gap-8 sm:grid-cols-3">
-              {[
-                { icon: MapPin, color: "var(--color-clay)", title: "We find your area", body: "The moment you land, we quietly show art from artists in your country — not a global blur." },
-                { icon: Search, color: "var(--color-pine)", title: "You meet the makers", body: "Real people with names, streets, and stories. See a porch light glowing? That artist is around and taking commissions." },
-                { icon: HandHeart, color: "var(--color-berry)", title: "You buy direct", body: "No gallery, no middleman. Artists keep 90%. Your money stays close to home." },
-              ].map((step) => (
-                <div key={step.title} className="text-center">
-                  <div
-                    className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
-                    style={{ background: step.color }}
-                  >
-                    <step.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-[var(--color-ink)]">{step.title}</h3>
-                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-[var(--color-ink-2)]">{step.body}</p>
-                </div>
-              ))}
-            </div>
+            <LocalFeed artworks={artworks} artists={artists} limit={8} />
           </div>
         </section>
 
