@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/neighborhoods?mine=1", label: "My Neighborhood" },
-  { href: "/neighborhoods", label: "Other Neighborhoods" },
+  { href: "/browse", label: "Browse" },
   { href: "/artists", label: "Artists" },
+  { href: "/favorites", label: "Favorites" },
   { href: "/sell", label: "Sell Your Art" },
-  { href: "/account", label: "My Profile" },
+  { href: "/about", label: "About" },
+  { href: "/profile", label: "My Profile" },
 ];
 
 export function MobileMenu() {

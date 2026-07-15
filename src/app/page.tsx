@@ -1,280 +1,123 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Header, Footer } from "@/components/chrome";
-import { ArtworkCard } from "@/components/artwork-card";
+import { HomeHero } from "@/components/home-hero";
+import { LocalFeed } from "@/components/local-feed";
 import { fetchArtists, fetchArtworks } from "@/lib/repo";
-import { ArrowRight, MapPin } from "lucide-react";
+import { PorchLight, isArtistActive } from "@/components/porch-light";
+import { MapPin, Search, HandHeart, Home as HomeIcon } from "lucide-react";
 
 export const revalidate = 60;
 
-const CATEGORY_TILES = [
-  { label: "PHOTOGRAPHY", tag: "photo" },
-  { label: "GRAPHICS", tag: "digital" },
-  { label: "PAINTINGS", tag: "painting" },
-  { label: "SCULPTURES", tag: "sculpture" },
-];
-
 export default async function HomePage() {
   const [artists, artworks] = await Promise.all([fetchArtists(), fetchArtworks()]);
-  const featured = artworks.slice(0, 8);
-  const featuredArtists = artists.slice(0, 6);
-  const heroArt = artworks[0];
-
-  // Neighborhood tiles — unique cities
-  const cities = Array.from(
-    new Map(artists.map((a) => [a.city, { city: a.city, flag: a.countryFlag, country: a.country }])).values()
-  ).slice(0, 6);
-
-  // Pick an image for each category tile
-  const tileImages = artworks.slice(0, 4).map((w) => w.image);
+  const spotlight = artists[0] ?? null;
+  const spotlightWorks = spotlight
+    ? artworks.filter((w) => w.artistId === spotlight.id).slice(0, 3)
+    : [];
 
   return (
     <>
       <Header />
-      <main className="bg-white">
-        {/* ── HERO BANNER ── */}
-        <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-          <div className="relative overflow-hidden">
-            {/* Background artwork */}
-            <div className="relative h-[300px] w-full sm:h-[380px] lg:h-[440px]">
-              {heroArt && (
-                <Image
-                  src={heroArt.image}
-                  alt={heroArt.title}
-                  fill
-                  priority
-                  sizes="100vw"
-                  className="object-cover"
-                  unoptimized={!heroArt.image.includes("unsplash.com")}
-                />
-              )}
-              {/* Left fade for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/40 to-transparent" />
+      <main>
+        {/* Human hero */}
+        <HomeHero artworks={artworks} artists={artists} />
 
-              {/* Text overlay */}
-              <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 lg:px-16">
-                <p className="mb-2 text-xs font-medium italic text-[var(--color-ink-2)]">
-                  Browse Works For Sale
-                </p>
-                <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-wide text-[var(--color-ink)] sm:text-6xl lg:text-7xl">
-                  ART FROM<br />YOUR NEIGHBOR
-                </h1>
-                <p className="mt-3 max-w-sm text-sm text-[var(--color-ink-2)] leading-relaxed">
-                  Original art from real artists in real neighborhoods around the world.
-                  Buy direct — artists keep 90%.
-                </p>
-                <Link
-                  href="/browse"
-                  className="mt-6 inline-flex w-fit items-center gap-2 bg-black px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-[var(--color-hot-pink)]"
-                >
-                  Read More
-                </Link>
-              </div>
+        {/* Local preview grid */}
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+          <div className="mb-6 flex items-end justify-between">
+            <div>
+              <p className="font-hand text-2xl text-[var(--color-clay)]">fresh off the easel</p>
+              <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+                Art from your neighborhood
+              </h2>
+            </div>
+            <Link href="/browse" className="btn-outline hidden sm:inline-flex">See all nearby</Link>
+          </div>
+          <LocalFeed artworks={artworks} artists={artists} limit={8} />
+        </section>
 
-              {/* Carousel dots (decorative) */}
-              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-                <span className="h-2 w-2 rounded-full bg-[var(--color-ink)]" />
-                <span className="h-2 w-2 rounded-full bg-[var(--color-ink)]/30" />
-                <span className="h-2 w-2 rounded-full bg-[var(--color-ink)]/30" />
-              </div>
+        {/* How it works */}
+        <section className="bg-[var(--color-linen)] py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-10 text-center">
+              <p className="font-hand text-2xl text-[var(--color-clay)]">the whole idea</p>
+              <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+                How it works
+              </h2>
+            </div>
+            <div className="grid gap-8 sm:grid-cols-3">
+              {[
+                { icon: MapPin, color: "var(--color-clay)", title: "We find your area", body: "The moment you land, we quietly show art from artists in your country — not a global blur." },
+                { icon: Search, color: "var(--color-pine)", title: "You meet the makers", body: "Real people with names, streets, and stories. See a porch light glowing? That artist is around and taking commissions." },
+                { icon: HandHeart, color: "var(--color-berry)", title: "You buy direct", body: "No gallery, no middleman. Artists keep 90%. Your money stays close to home." },
+              ].map((step) => (
+                <div key={step.title} className="text-center">
+                  <div
+                    className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+                    style={{ background: step.color }}
+                  >
+                    <step.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-display text-xl font-semibold text-[var(--color-ink)]">{step.title}</h3>
+                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-[var(--color-ink-2)]">{step.body}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── CATEGORY TILES ── */}
-        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {CATEGORY_TILES.map((cat, i) => (
-              <Link
-                key={cat.label}
-                href={`/browse?tag=${encodeURIComponent(cat.tag)}`}
-                className="group relative h-32 overflow-hidden sm:h-36"
-              >
-                {tileImages[i] && (
-                  <Image
-                    src={tileImages[i]}
-                    alt={cat.label}
-                    fill
-                    sizes="(max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    unoptimized={!tileImages[i].includes("unsplash.com")}
-                  />
-                )}
-                <div className="absolute inset-0 bg-black/35 transition-colors group-hover:bg-black/25" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-[family-name:var(--font-display)] text-2xl tracking-widest text-white drop-shadow-md">
-                    {cat.label}
-                  </span>
+        {/* Artist spotlight */}
+        {spotlight && (
+          <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+            <div className="grid items-center gap-10 rounded-sm border border-[var(--color-border)] bg-[var(--color-linen)] p-6 sm:p-10 lg:grid-cols-2">
+              <div>
+                <p className="font-hand text-2xl text-[var(--color-clay)]">neighbor spotlight</p>
+                <div className="mt-3 flex items-center gap-4">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)]">
+                    {spotlight.avatar ? (
+                      <Image src={spotlight.avatar} alt={spotlight.name} fill sizes="80px" className="object-cover" unoptimized={!spotlight.avatar.includes("unsplash.com")} />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[var(--color-linen-2)] text-2xl font-bold text-[var(--color-ink-3)]">{spotlight.name.charAt(0)}</div>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-display text-2xl font-semibold text-[var(--color-ink)]">{spotlight.name}</h3>
+                    <div className="mt-0.5 flex items-center gap-1 text-sm text-[var(--color-ink-2)]">
+                      <MapPin className="h-3.5 w-3.5 text-[var(--color-clay)]" />
+                      {spotlight.neighborhood}, {spotlight.city}
+                    </div>
+                    <div className="mt-1"><PorchLight on={isArtistActive(spotlight.id)} size={16} withLabel /></div>
+                  </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* ── BROWSE BY MEDIUM STRIP ── */}
-        <section className="border-y border-[var(--color-border)] bg-white py-8">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-sm font-semibold uppercase tracking-widest text-[var(--color-ink-2)]">
-                Browse by Style
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {["Painting", "Photography", "Sculpture", "Digital Art", "Graffiti / Street Art", "Illustration"].map((s) => (
-                  <Link
-                    key={s}
-                    href={`/browse?tag=${encodeURIComponent(s.toLowerCase())}`}
-                    className="tag-pill text-sm"
-                  >
-                    {s}
+                <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--color-ink-2)]">{spotlight.bio}</p>
+                <Link href={`/artists/${spotlight.id}`} className="btn-primary mt-6">Meet the artist</Link>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {spotlightWorks.map((w) => (
+                  <Link key={w.id} href={`/art/${w.slug}`} className="group relative aspect-[3/4] overflow-hidden rounded-sm bg-[var(--color-linen-2)]">
+                    <Image src={w.image} alt={w.title} fill sizes="20vw" className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized={!w.image.includes("unsplash.com")} />
                   </Link>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ── FEATURED ARTWORKS ── */}
-        <section className="py-14">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-3)]">
-                  Latest Drops
-                </p>
-                <h2 className="mt-1 font-[family-name:var(--font-display)] text-3xl tracking-wide text-[var(--color-ink)] sm:text-4xl">
-                  NEW ON THE WALL
-                </h2>
-              </div>
-              <Link href="/browse" className="btn-outline hidden sm:inline-flex">
-                View All <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {featured.map((w, i) => {
-                const artist = artists.find((a) => a.id === w.artistId) ?? null;
-                return <ArtworkCard key={w.id} artwork={w} index={i} artist={artist} />;
-              })}
-            </div>
-            <div className="mt-8 text-center sm:hidden">
-              <Link href="/browse" className="btn-outline">
-                View All <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── NEIGHBORHOODS ── */}
-        <section className="bg-[var(--color-canvas-2)] py-14">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="mb-8">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-3)]">
-                Discover
-              </p>
-              <h2 className="mt-1 font-[family-name:var(--font-display)] text-3xl tracking-wide text-[var(--color-ink)] sm:text-4xl">
-                ART BY LOCATION
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {cities.map((c) => (
-                <Link
-                  key={c.city}
-                  href={`/browse?loc=${encodeURIComponent(c.city)}`}
-                  className="group flex flex-col items-center justify-center gap-2 border border-[var(--color-border)] bg-white p-5 text-center transition-shadow hover:shadow-md"
-                >
-                  <span className="text-3xl">{c.flag}</span>
-                  <span className="font-semibold text-sm text-[var(--color-ink)]">{c.city}</span>
-                  <span className="text-xs text-[var(--color-ink-3)]">{c.country}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="mt-6 text-center">
-              <Link href="/neighborhoods" className="btn-outline">
-                View All Neighborhoods <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── ARTISTS ── */}
-        <section className="py-14">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-3)]">
-                  Meet the Makers
-                </p>
-                <h2 className="mt-1 font-[family-name:var(--font-display)] text-3xl tracking-wide text-[var(--color-ink)] sm:text-4xl">
-                  FEATURED ARTISTS
-                </h2>
-              </div>
-              <Link href="/artists" className="btn-outline hidden sm:inline-flex">
-                All Artists <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-              {featuredArtists.map((a) => (
-                <Link
-                  key={a.id}
-                  href={`/artists/${a.id}`}
-                  className="group flex flex-col items-center gap-3 text-center"
-                >
-                  <div className="relative h-20 w-20 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-canvas-3)] transition-shadow group-hover:shadow-md">
-                    {a.avatar ? (
-                      <Image
-                        src={a.avatar}
-                        alt={a.name}
-                        fill
-                        sizes="80px"
-                        className="object-cover transition-transform group-hover:scale-110"
-                        unoptimized={!a.avatar.includes("unsplash.com")}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-[var(--color-canvas-3)] text-xl font-bold text-[var(--color-ink-3)]">
-                        {a.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--color-ink)]">{a.name}</p>
-                    <div className="flex items-center justify-center gap-0.5 text-xs text-[var(--color-ink-3)]">
-                      <MapPin className="h-3 w-3" />
-                      <span>{a.city} {a.countryFlag}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── SELL CTA ── */}
-        <section className="bg-[var(--color-ink)] py-16 text-white">
-          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-acid-lime)]">
-              For Artists
-            </p>
-            <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl tracking-wide sm:text-5xl">
-              SELL YOUR ART.<br />
-              <span style={{ color: "var(--color-hot-pink)" }}>KEEP 90%.</span>
+        {/* Sell CTA */}
+        <section className="bg-[var(--color-ink)] py-16 text-[var(--color-linen)]">
+          <div className="mx-auto flex max-w-4xl flex-col items-center px-4 text-center sm:px-6">
+            <HomeIcon className="h-8 w-8 text-[var(--color-marigold)]" />
+            <h2 className="mt-4 font-display text-3xl font-semibold sm:text-4xl">
+              You're someone's neighbor too.
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-sm text-white/70 leading-relaxed">
-              No gatekeepers. No gallery commission. List your work, set your price,
-              get paid direct. We handle the rest.
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-[var(--color-linen)]/70">
+              If you make art, your street should know. List your work in a few minutes,
+              set your own prices, keep 90% of every sale.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <Link
-                href="/sell"
-                className="inline-flex items-center gap-2 bg-[var(--color-hot-pink)] px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-              >
-                Start Selling <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/account/profile"
-                className="inline-flex items-center gap-2 border border-white/30 px-8 py-3 text-sm font-medium text-white transition-colors hover:border-white"
-              >
-                Set Up Profile
-              </Link>
-            </div>
+            <Link href="/sell" className="mt-7 inline-flex items-center gap-2 rounded-sm bg-[var(--color-marigold)] px-8 py-3 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-white">
+              Sell your art
+            </Link>
           </div>
         </section>
       </main>

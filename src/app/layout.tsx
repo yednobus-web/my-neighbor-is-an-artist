@@ -1,36 +1,37 @@
 import type { Metadata } from "next";
-import { Bangers, Permanent_Marker, Archivo } from "next/font/google";
+import { Fraunces, Inter, Caveat } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
+import { LocationProvider } from "@/components/location-provider";
+import { FavoritesProvider } from "@/components/favorites-provider";
 
-const bangers = Bangers({
-  weight: "400",
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-bangers",
+  variable: "--font-display",
+  display: "swap",
+  axes: ["SOFT", "WONK", "opsz"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
   display: "swap",
 });
 
-const permanentMarker = Permanent_Marker({
-  weight: "400",
+const caveat = Caveat({
   subsets: ["latin"],
-  variable: "--font-marker",
-  display: "swap",
-});
-
-const archivo = Archivo({
-  subsets: ["latin"],
-  variable: "--font-archivo",
+  variable: "--font-hand",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "MY NEIGHBOR IS AN ARTIST — Global Art Marketplace",
+  title: "My Neighbor Is An Artist — Art from your neighborhood",
   description:
-    "Discover wild art from real neighborhoods around the world. Buy direct from local artists, support your block, your city, your scene.",
+    "The person two streets over paints. Discover and buy original art directly from artists near you.",
   openGraph: {
-    title: "MY NEIGHBOR IS AN ARTIST",
+    title: "My Neighbor Is An Artist",
     description:
-      "A loud, local, global art marketplace. Find the dopest artists on your block.",
+      "The person two streets over paints. Discover and buy original art directly from artists near you.",
     type: "website",
   },
 };
@@ -39,9 +40,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${bangers.variable} ${permanentMarker.variable} ${archivo.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${caveat.variable}`}>
       <body>
-        <CartProvider>{children}</CartProvider>
+        <LocationProvider>
+          <FavoritesProvider>
+            <CartProvider>{children}</CartProvider>
+          </FavoritesProvider>
+        </LocationProvider>
       </body>
     </html>
   );

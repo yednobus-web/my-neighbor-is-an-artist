@@ -1,234 +1,152 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Archivo:wght@400;500;600;700&display=swap");
 
 @theme {
-  --font-display: "Bangers", "Impact", system-ui, sans-serif;
-  --font-marker: "Permanent Marker", cursive;
-  --font-body: "Archivo", "Inter", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-hand: "Caveat", cursive;
 
-  /* New clean palette */
-  --color-canvas:     #ffffff;
-  --color-canvas-2:   #f8f8f6;
-  --color-canvas-3:   #f0ede8;
-  --color-border:     #e2e0db;
-  --color-ink:        #1a1a1a;
-  --color-ink-2:      #4a4a4a;
-  --color-ink-3:      #8a8a8a;
+  /* Warm putty base — not white, not sterile cream */
+  --color-plaster:   #e9e3d6;
+  --color-linen:     #f4efe6;
+  --color-linen-2:   #ede6d8;
+  --color-border:    #d8cfbd;
+  --color-ink:       #2a2622;
+  --color-ink-2:     #5c554c;
+  --color-ink-3:     #8f867a;
 
-  /* Accent — kept from original brand */
-  --color-hot-pink:        #e8175d;
-  --color-acid-lime:       #8dc63f;
-  --color-cyber-cyan:      #00a3c4;
-  --color-sun-yellow:      #f5a623;
-  --color-electric-purple: #7b2d8b;
-  --color-blood-orange:    #e84c1e;
-  --color-spray-blue:      #1a56db;
+  /* Deliberate jewel-tone accents, rotated across categories */
+  --color-marigold:  #e0a32e;
+  --color-berry:     #7b2d4e;
+  --color-pine:      #2f5d50;
+  --color-indigo:    #33417a;
+  --color-clay:      #c15b3f;
 
-  /* Legacy aliases so nothing breaks */
-  --color-paper: #ffffff;
+  /* legacy aliases so old classes don't crash mid-migration */
+  --color-hot-pink:  #7b2d4e;
+  --color-acid-lime: #2f5d50;
+  --color-paper:     #f4efe6;
+  --color-canvas:    #e9e3d6;
+  --color-canvas-2:  #f4efe6;
+  --color-canvas-3:  #ede6d8;
 }
 
 @layer base {
   html {
-    background: var(--color-canvas);
+    background: var(--color-plaster);
     scroll-behavior: smooth;
   }
-
   body {
-    background: var(--color-canvas);
+    background: var(--color-plaster);
     color: var(--color-ink);
     font-family: var(--font-body);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
+  * { box-sizing: border-box; }
 
-  * {
-    box-sizing: border-box;
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer utilities {
-  /* Typography helpers */
-  .font-display {
-    font-family: var(--font-display);
-  }
-  .font-marker {
-    font-family: var(--font-marker);
-  }
+  .font-display { font-family: var(--font-display); }
+  .font-hand    { font-family: var(--font-hand); }
 
-  /* Thin card border */
-  .card {
-    background: var(--color-canvas);
+  /* Home-gallery-wall card: soft warm shadow, generous feel */
+  .art-card {
+    background: var(--color-linen);
     border: 1px solid var(--color-border);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 1px 2px rgba(42,38,34,0.04);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
   }
-  .card:hover {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
-    transform: translateY(-2px);
-  }
-
-  /* Accent pill tag */
-  .tag-pill {
-    display: inline-block;
-    padding: 2px 10px;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    font-size: 0.75rem;
-    color: var(--color-ink-2);
-    background: var(--color-canvas-2);
-    white-space: nowrap;
-  }
-  .tag-pill:hover {
-    background: var(--color-ink);
-    color: #fff;
-    border-color: var(--color-ink);
-  }
-  .tag-pill.active {
-    background: var(--color-ink);
-    color: #fff;
-    border-color: var(--color-ink);
+  .art-card:hover {
+    box-shadow: 0 16px 40px -12px rgba(42,38,34,0.28);
+    transform: translateY(-3px);
   }
 
-  /* Button styles */
+  /* Handwritten price tag */
+  .price-tag {
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-berry);
+  }
+
+  /* Buttons */
   .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 24px;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 26px;
     background: var(--color-ink);
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.875rem;
-    letter-spacing: 0.03em;
-    border: none;
-    cursor: pointer;
-    transition: background 0.15s ease, opacity 0.15s ease;
+    color: var(--color-linen);
+    font-weight: 600; font-size: 0.9rem;
+    border: none; cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.18s ease;
   }
-  .btn-primary:hover {
-    background: var(--color-hot-pink);
-  }
+  .btn-primary:hover { background: var(--color-berry); }
 
   .btn-outline {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 20px;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px;
     background: transparent;
     color: var(--color-ink);
-    font-weight: 500;
-    font-size: 0.875rem;
+    font-weight: 500; font-size: 0.9rem;
+    border: 1px solid var(--color-ink);
+    cursor: pointer; border-radius: 2px;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+  .btn-outline:hover { background: var(--color-ink); color: var(--color-linen); }
+
+  /* Category accent chips (jewel tones) */
+  .chip {
+    display: inline-block; padding: 4px 14px;
+    border-radius: 999px; font-size: 0.8rem; font-weight: 500;
     border: 1px solid var(--color-border);
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .btn-outline:hover {
-    border-color: var(--color-ink);
-    background: var(--color-canvas-2);
-  }
-
-  /* Price badge */
-  .price-badge {
-    font-weight: 700;
-    color: var(--color-ink);
-  }
-
-  /* Section divider */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--color-border);
-  }
-
-  /* Announcement bar */
-  .announcement-bar {
-    background: var(--color-ink);
-    color: #fff;
-    text-align: center;
-    font-size: 0.8rem;
-    padding: 8px 16px;
-    letter-spacing: 0.04em;
-  }
-
-  /* Sidebar filter group */
-  .filter-group-title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    background: var(--color-linen);
     color: var(--color-ink-2);
-    margin-bottom: 8px;
-    padding-bottom: 6px;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { background: var(--color-ink); color: var(--color-linen); border-color: var(--color-ink); }
+  .chip.active { background: var(--color-ink); color: var(--color-linen); border-color: var(--color-ink); }
+
+  .filter-group-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--color-ink-3);
+    margin-bottom: 8px; padding-bottom: 6px;
     border-bottom: 1px solid var(--color-border);
   }
 
-  /* Vibrant animated header — inspired by abstract multicolor art */
-  .vibrant-header {
-    background: linear-gradient(
-      100deg,
-      #e8175d 0%,
-      #e84c1e 18%,
-      #f5a623 36%,
-      #8dc63f 54%,
-      #00a3c4 72%,
-      #7b2d8b 90%,
-      #e8175d 100%
-    );
-    background-size: 250% 100%;
-    animation: header-shift 18s ease infinite;
-  }
-  @keyframes header-shift {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  /* Hero gradient — same vibrant palette, richer for the big top section */
-  .hero-gradient {
-    background: linear-gradient(
-      120deg,
-      #e8175d 0%,
-      #e84c1e 25%,
-      #f5a623 45%,
-      #8dc63f 65%,
-      #00a3c4 82%,
-      #7b2d8b 100%
-    );
-    background-size: 200% 200%;
-    animation: header-shift 22s ease infinite;
-  }
-
-  /* Marquee — kept for fun strip */
-  .marquee {
-    animation: marquee 30s linear infinite;
-  }
+  .marquee { animation: marquee 40s linear infinite; }
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
 
-  /* Legacy graffiti shadows (still used in some pages) */
-  .shadow-graffiti      { box-shadow: 4px 4px 0 0 #1a1a1a; }
-  .shadow-graffiti-lg   { box-shadow: 6px 6px 0 0 #1a1a1a; }
-  .shadow-graffiti-pink { box-shadow: 4px 4px 0 0 var(--color-hot-pink); }
-  .shadow-graffiti-cyan { box-shadow: 4px 4px 0 0 var(--color-cyber-cyan); }
-  .shadow-graffiti-lime { box-shadow: 4px 4px 0 0 var(--color-acid-lime); }
-
-  .text-stroke-ink   { -webkit-text-stroke: 2px #1a1a1a; paint-order: stroke fill; }
-  .text-stroke-paper { -webkit-text-stroke: 2px #fff;    paint-order: stroke fill; }
-
-  .grid-bg {
-    background-image:
-      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+  /* ── Porch light signature ── */
+  /* A small lamp; when .is-on, the glow pulses gently. */
+  .porch-glow {
+    filter: drop-shadow(0 0 0 rgba(224,163,46,0));
+  }
+  .porch-glow.is-on {
+    animation: porch-flicker 4s ease-in-out infinite;
+  }
+  @keyframes porch-flicker {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(224,163,46,0.75)); }
+    50%      { filter: drop-shadow(0 0 12px rgba(224,163,46,0.95)); }
   }
 
-  .stripe-pink {
-    background-image: repeating-linear-gradient(
-      45deg,
-      var(--color-hot-pink),
-      var(--color-hot-pink) 10px,
-      #fff 10px,
-      #fff 20px
-    );
+  /* legacy graffiti shadows mapped to soft warm shadows */
+  .shadow-graffiti,
+  .shadow-graffiti-lg,
+  .shadow-graffiti-pink,
+  .shadow-graffiti-cyan,
+  .shadow-graffiti-lime {
+    box-shadow: 0 8px 24px -10px rgba(42,38,34,0.25);
   }
 }

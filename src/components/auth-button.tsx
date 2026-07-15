@@ -16,12 +16,11 @@ export function AuthButton() {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  // Signed in → My Profile
   if (signedIn) {
     return (
       <Link
-        href="/account"
-        className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-[var(--color-ink)] shadow-sm transition hover:bg-white"
+        href="/profile"
+        className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-linen)] px-3 py-1.5 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-ink)]"
       >
         <User className="h-4 w-4" />
         <span className="hidden sm:inline">My Profile</span>
@@ -29,14 +28,13 @@ export function AuthButton() {
     );
   }
 
-  // Signed out (or still loading) → Log in / Sign up
   return (
     <Link
       href="/login"
-      className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-[var(--color-ink)] shadow-sm transition hover:bg-white"
+      className="flex items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-4 py-1.5 text-sm font-semibold text-[var(--color-linen)] transition hover:bg-[var(--color-berry)]"
     >
       <LogIn className="h-4 w-4" />
-      <span className="hidden sm:inline">Log in / Sign up</span>
+      <span className="hidden sm:inline">Log in</span>
     </Link>
   );
 }

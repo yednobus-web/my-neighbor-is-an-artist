@@ -9,12 +9,12 @@ export function CartLink() {
   return (
     <Link
       href="/cart"
-      className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] shadow-sm transition hover:bg-white"
+      className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-ink-2)] transition hover:bg-[var(--color-linen)]"
       aria-label="Cart"
     >
       <ShoppingBag className="h-4 w-4" />
       {count > 0 && (
-        <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--color-hot-pink)] px-1 text-[10px] font-bold text-white ring-2 ring-white">
+        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--color-clay)] px-1 text-[10px] font-bold text-white">
           {count}
         </span>
       )}
