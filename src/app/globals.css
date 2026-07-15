@@ -1,146 +1,198 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Archivo:wght@400;500;600;700&display=swap");
 
 @theme {
   --font-display: "Bangers", "Impact", system-ui, sans-serif;
   --font-marker: "Permanent Marker", cursive;
   --font-body: "Archivo", "Inter", system-ui, sans-serif;
 
-  --color-ink: #0a0a0a;
-  --color-paper: #fef9e7;
-  --color-hot-pink: #ff2d87;
-  --color-acid-lime: #c6ff00;
-  --color-cyber-cyan: #00f0ff;
-  --color-sun-yellow: #ffd60a;
-  --color-electric-purple: #9d00ff;
-  --color-blood-orange: #ff5722;
-  --color-spray-blue: #2962ff;
+  /* New clean palette */
+  --color-canvas:     #ffffff;
+  --color-canvas-2:   #f8f8f6;
+  --color-canvas-3:   #f0ede8;
+  --color-border:     #e2e0db;
+  --color-ink:        #1a1a1a;
+  --color-ink-2:      #4a4a4a;
+  --color-ink-3:      #8a8a8a;
+
+  /* Accent — kept from original brand */
+  --color-hot-pink:        #e8175d;
+  --color-acid-lime:       #8dc63f;
+  --color-cyber-cyan:      #00a3c4;
+  --color-sun-yellow:      #f5a623;
+  --color-electric-purple: #7b2d8b;
+  --color-blood-orange:    #e84c1e;
+  --color-spray-blue:      #1a56db;
+
+  /* Legacy aliases so nothing breaks */
+  --color-paper: #ffffff;
 }
 
 @layer base {
-  :root {
-    --background: var(--color-ink);
-    --foreground: var(--color-paper);
-  }
-
   html {
-    background: var(--color-ink);
+    background: var(--color-canvas);
+    scroll-behavior: smooth;
   }
 
   body {
-    background: var(--color-ink);
-    color: var(--color-paper);
+    background: var(--color-canvas);
+    color: var(--color-ink);
     font-family: var(--font-body);
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(255, 45, 135, 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.12) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(198, 255, 0, 0.08) 0%, transparent 50%);
-    background-attachment: fixed;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Subtle paper noise overlay */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
+  * {
+    box-sizing: border-box;
   }
 }
 
 @layer utilities {
-  .text-stroke-ink {
-    -webkit-text-stroke: 2px var(--color-ink);
-    paint-order: stroke fill;
+  /* Typography helpers */
+  .font-display {
+    font-family: var(--font-display);
   }
-  .text-stroke-paper {
-    -webkit-text-stroke: 2px var(--color-paper);
-    paint-order: stroke fill;
-  }
-  .text-stroke-thick {
-    -webkit-text-stroke: 4px var(--color-ink);
-    paint-order: stroke fill;
+  .font-marker {
+    font-family: var(--font-marker);
   }
 
-  .shadow-graffiti {
-    box-shadow: 6px 6px 0 0 var(--color-ink);
+  /* Thin card border */
+  .card {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
-  .shadow-graffiti-lg {
-    box-shadow: 10px 10px 0 0 var(--color-ink);
-  }
-  .shadow-graffiti-pink {
-    box-shadow: 6px 6px 0 0 var(--color-hot-pink);
-  }
-  .shadow-graffiti-cyan {
-    box-shadow: 6px 6px 0 0 var(--color-cyber-cyan);
-  }
-  .shadow-graffiti-lime {
-    box-shadow: 6px 6px 0 0 var(--color-acid-lime);
+  .card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    transform: translateY(-2px);
   }
 
-  .tape {
-    position: relative;
+  /* Accent pill tag */
+  .tag-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: var(--color-ink-2);
+    background: var(--color-canvas-2);
+    white-space: nowrap;
   }
-  .tape::before {
-    content: "";
-    position: absolute;
-    top: -14px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-3deg);
-    width: 80px;
-    height: 24px;
-    background: rgba(255, 214, 10, 0.7);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    z-index: 2;
+  .tag-pill:hover {
+    background: var(--color-ink);
+    color: #fff;
+    border-color: var(--color-ink);
   }
-
-  .sticker {
-    transform: rotate(-2deg);
-    transition: transform 0.2s ease;
-  }
-  .sticker:hover {
-    transform: rotate(0deg) scale(1.03);
-  }
-  .sticker-r {
-    transform: rotate(2deg);
-  }
-  .sticker-r:hover {
-    transform: rotate(0deg) scale(1.03);
+  .tag-pill.active {
+    background: var(--color-ink);
+    color: #fff;
+    border-color: var(--color-ink);
   }
 
+  /* Button styles */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    background: var(--color-ink);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.03em;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+  .btn-primary:hover {
+    background: var(--color-hot-pink);
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    background: transparent;
+    color: var(--color-ink);
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-outline:hover {
+    border-color: var(--color-ink);
+    background: var(--color-canvas-2);
+  }
+
+  /* Price badge */
+  .price-badge {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  /* Section divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* Announcement bar */
+  .announcement-bar {
+    background: var(--color-ink);
+    color: #fff;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Sidebar filter group */
+  .filter-group-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Marquee — kept for fun strip */
   .marquee {
-    animation: marquee 25s linear infinite;
+    animation: marquee 35s linear infinite;
   }
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
 
-  .wiggle:hover {
-    animation: wiggle 0.4s ease-in-out;
-  }
-  @keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-3deg); }
-    75% { transform: rotate(3deg); }
+  /* Legacy graffiti shadows (still used in some pages) */
+  .shadow-graffiti      { box-shadow: 4px 4px 0 0 #1a1a1a; }
+  .shadow-graffiti-lg   { box-shadow: 6px 6px 0 0 #1a1a1a; }
+  .shadow-graffiti-pink { box-shadow: 4px 4px 0 0 var(--color-hot-pink); }
+  .shadow-graffiti-cyan { box-shadow: 4px 4px 0 0 var(--color-cyber-cyan); }
+  .shadow-graffiti-lime { box-shadow: 4px 4px 0 0 var(--color-acid-lime); }
+
+  .text-stroke-ink   { -webkit-text-stroke: 2px #1a1a1a; paint-order: stroke fill; }
+  .text-stroke-paper { -webkit-text-stroke: 2px #fff;    paint-order: stroke fill; }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 
   .stripe-pink {
     background-image: repeating-linear-gradient(
       45deg,
       var(--color-hot-pink),
-      var(--color-hot-pink) 12px,
-      var(--color-ink) 12px,
-      var(--color-ink) 24px
+      var(--color-hot-pink) 10px,
+      #fff 10px,
+      #fff 20px
     );
-  }
-
-  .grid-bg {
-    background-image:
-      linear-gradient(rgba(254, 249, 231, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(254, 249, 231, 0.06) 1px, transparent 1px);
-    background-size: 32px 32px;
   }
 }
