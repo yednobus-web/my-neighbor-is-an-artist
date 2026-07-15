@@ -8,6 +8,7 @@ import {
   type Artwork,
 } from "./data";
 import { createSupabasePublic, isPublicSupabaseConfigured } from "./supabase-public";
+import { unstable_cache } from "next/cache";
 
 type DBArtist = {
   id: string;
@@ -83,25 +84,43 @@ function dbToArtwork(w: DBArtwork): Artwork {
 
 export async function fetchArtists(): Promise<Artist[]> {
   if (!isPublicSupabaseConfigured) return MOCK_ARTISTS;
-  const sb = createSupabasePublic();
-  if (!sb) return MOCK_ARTISTS;
-  const { data, error } = await sb.from("artists").select("*").order("created_at", { ascending: false });
-  if (error || !data || data.length === 0) return MOCK_ARTISTS;
-  return (data as unknown as DBArtist[]).map(dbToArtist);
+  return getCachedArtists();
 }
 
 export async function fetchArtworks(): Promise<Artwork[]> {
   if (!isPublicSupabaseConfigured) return MOCK_ARTWORKS;
-  const sb = createSupabasePublic();
-  if (!sb) return MOCK_ARTWORKS;
-  const { data, error } = await sb
-    .from("artworks")
-    .select("*")
-    .neq("status", "draft")
-    .order("created_at", { ascending: false });
-  if (error || !data || data.length === 0) return MOCK_ARTWORKS;
-  return (data as unknown as DBArtwork[]).map(dbToArtwork);
+  return getCachedArtworks();
 }
+
+// Cache DB reads for 60s across ALL requests (even dynamic pages like /browse),
+// so filtering doesn't trigger a fresh cross-network query every time.
+const getCachedArtists = unstable_cache(
+  async (): Promise<Artist[]> => {
+    const sb = createSupabasePublic();
+    if (!sb) return MOCK_ARTISTS;
+    const { data, error } = await sb.from("artists").select("*").order("created_at", { ascending: false });
+    if (error || !data || data.length === 0) return MOCK_ARTISTS;
+    return (data as unknown as DBArtist[]).map(dbToArtist);
+  },
+  ["artists-all"],
+  { revalidate: 60, tags: ["artists"] },
+);
+
+const getCachedArtworks = unstable_cache(
+  async (): Promise<Artwork[]> => {
+    const sb = createSupabasePublic();
+    if (!sb) return MOCK_ARTWORKS;
+    const { data, error } = await sb
+      .from("artworks")
+      .select("*")
+      .neq("status", "draft")
+      .order("created_at", { ascending: false });
+    if (error || !data || data.length === 0) return MOCK_ARTWORKS;
+    return (data as unknown as DBArtwork[]).map(dbToArtwork);
+  },
+  ["artworks-all"],
+  { revalidate: 60, tags: ["artworks"] },
+);
 
 export async function fetchArtist(id: string): Promise<Artist | null> {
   const all = await fetchArtists();
