@@ -7,7 +7,7 @@ import {
   type Artist,
   type Artwork,
 } from "./data";
-import { createSupabaseServer, isSupabaseConfigured } from "./supabase";
+import { createSupabasePublic, isPublicSupabaseConfigured } from "./supabase-public";
 
 type DBArtist = {
   id: string;
@@ -82,17 +82,17 @@ function dbToArtwork(w: DBArtwork): Artwork {
 }
 
 export async function fetchArtists(): Promise<Artist[]> {
-  if (!isSupabaseConfigured) return MOCK_ARTISTS;
-  const sb = await createSupabaseServer();
+  if (!isPublicSupabaseConfigured) return MOCK_ARTISTS;
+  const sb = createSupabasePublic();
   if (!sb) return MOCK_ARTISTS;
   const { data, error } = await sb.from("artists").select("*").order("created_at", { ascending: false });
   if (error || !data || data.length === 0) return MOCK_ARTISTS;
-  return data.map(dbToArtist);
+  return (data as unknown as DBArtist[]).map(dbToArtist);
 }
 
 export async function fetchArtworks(): Promise<Artwork[]> {
-  if (!isSupabaseConfigured) return MOCK_ARTWORKS;
-  const sb = await createSupabaseServer();
+  if (!isPublicSupabaseConfigured) return MOCK_ARTWORKS;
+  const sb = createSupabasePublic();
   if (!sb) return MOCK_ARTWORKS;
   const { data, error } = await sb
     .from("artworks")
@@ -100,7 +100,7 @@ export async function fetchArtworks(): Promise<Artwork[]> {
     .neq("status", "draft")
     .order("created_at", { ascending: false });
   if (error || !data || data.length === 0) return MOCK_ARTWORKS;
-  return data.map(dbToArtwork);
+  return (data as unknown as DBArtwork[]).map(dbToArtwork);
 }
 
 export async function fetchArtist(id: string): Promise<Artist | null> {
