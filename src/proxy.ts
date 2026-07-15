@@ -10,6 +10,13 @@ export async function proxy(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return NextResponse.next();
 
+  // Fast path: anonymous visitors have no Supabase auth cookie, so there's
+  // nothing to refresh. Skip the auth-server round-trip entirely for them.
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+  if (!hasAuthCookie) return NextResponse.next();
+
   const response = NextResponse.next({ request });
   const supabase = createServerClient(url, key, {
     cookies: {
@@ -32,5 +39,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  // Only run on pages that actually depend on auth state.
+  // Public pages (home, browse, artists, art, map, neighborhoods) are skipped
+  // so they stay fast and cacheable.
+  matcher: ["/account/:path*", "/sell", "/auth/:path*"],
 };
