@@ -8,8 +8,8 @@ import { Search } from "lucide-react";
 import { useLocation } from "@/components/location-provider";
 import type { Artwork, Artist } from "@/lib/data";
 
-// Bold gallery hero (Yessy-style): a real piece behind a dark scrim,
-// headline, and a working search bar. Location-aware caption.
+// Gallery-hero (reference style): a real artwork fills the frame,
+// with a solid marigold block behind the welcome headline on the left.
 export function HomeHero({
   artworks,
   artists,
@@ -22,9 +22,10 @@ export function HomeHero({
   const byId = useMemo(() => new Map(artists.map((a) => [a.id, a])), [artists]);
   const [q, setQ] = useState("");
 
-  const backdrop = useMemo(() => {
+  const { backdrop, artist, piece } = useMemo(() => {
     const local = artworks.filter((w) => byId.get(w.artistId)?.country === country);
-    return (local[0] ?? artworks[0])?.image ?? "";
+    const p = local[0] ?? artworks[0];
+    return { backdrop: p?.image ?? "", artist: p ? byId.get(p.artistId) ?? null : null, piece: p ?? null };
   }, [artworks, byId, country]);
 
   function submit(e: React.FormEvent) {
@@ -33,13 +34,13 @@ export function HomeHero({
   }
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Backdrop art */}
-      <div className="relative h-[420px] w-full sm:h-[480px]">
+    <section className="relative overflow-hidden bg-[var(--color-plaster)]">
+      <div className="relative h-[520px] w-full sm:h-[560px]">
+        {/* Full artwork backdrop */}
         {backdrop && (
           <Image
             src={backdrop}
-            alt=""
+            alt={piece?.title ?? ""}
             fill
             priority
             sizes="100vw"
@@ -47,46 +48,49 @@ export function HomeHero({
             unoptimized={!backdrop.includes("unsplash.com")}
           />
         )}
-        {/* Warm dark scrim */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2a2622]/70 via-[#2a2622]/55 to-[#2a2622]/80" />
+        {/* soft warm wash so text reads, art still shows */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-plaster)]/95 via-[var(--color-plaster)]/40 to-transparent" />
 
-        {/* Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-          <p className="font-hand text-2xl text-[var(--color-marigold)] sm:text-3xl">
-            {ready && country ? `art from your neighborhood in ${country}` : "art from your neighborhood"}
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-white drop-shadow sm:text-6xl">
-            Your Neighbor Is An Artist
-          </h1>
-          <p className="mt-3 max-w-xl text-sm text-white/80 sm:text-base">
-            The person two streets over paints. Find them, meet them, and buy their
-            work directly — no gallery in between.
-          </p>
+        {/* Marigold color block + headline */}
+        <div className="absolute inset-y-0 left-0 flex items-center">
+          <div className="relative ml-4 sm:ml-10 lg:ml-16">
+            {/* the yellow block */}
+            <div className="absolute -left-4 top-6 h-[78%] w-[70%] bg-[var(--color-marigold)]" aria-hidden />
+            <div className="relative max-w-md px-6 py-8">
+              <p className="font-hand text-3xl text-[var(--color-ink)]">
+                {ready && country ? `welcome to ${country}` : "welcome to the"}
+              </p>
+              <h1 className="mt-1 font-display text-5xl font-semibold leading-[1.02] tracking-tight text-[var(--color-ink)] sm:text-6xl">
+                Your Neighbor<br />Is An Artist
+              </h1>
+              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-[var(--color-ink)]/85">
+                The person two streets over paints. Find them, meet them, and buy their
+                work directly — no gallery in between.
+              </p>
 
-          {/* Search bar */}
-          <form onSubmit={submit} className="mt-7 flex w-full max-w-xl items-center overflow-hidden rounded-sm bg-white shadow-xl">
-            <Search className="ml-4 h-5 w-5 shrink-0 text-[var(--color-ink-3)]" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search art, artists, styles…"
-              className="flex-1 bg-transparent px-3 py-3.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:outline-none"
-            />
-            <button type="submit" className="bg-[var(--color-clay)] px-6 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-[var(--color-berry)]">
-              Search
-            </button>
-          </form>
-
-          <div className="mt-4 flex gap-3">
-            <Link href="/browse" className="text-sm font-semibold text-white underline-offset-4 hover:underline">
-              Browse nearby →
-            </Link>
-            <span className="text-white/40">·</span>
-            <Link href="/sell" className="text-sm font-semibold text-white underline-offset-4 hover:underline">
-              Sell your art →
-            </Link>
+              <form onSubmit={submit} className="mt-6 flex max-w-sm items-center overflow-hidden rounded-sm border border-[var(--color-ink)] bg-white shadow-lg">
+                <Search className="ml-3 h-4 w-4 shrink-0 text-[var(--color-ink-3)]" />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search art, artists, styles…"
+                  className="flex-1 bg-transparent px-3 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:outline-none"
+                />
+                <button type="submit" className="bg-[var(--color-ink)] px-5 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-[var(--color-berry)]">
+                  Go
+                </button>
+              </form>
+            </div>
           </div>
         </div>
+
+        {/* caption plate bottom-right */}
+        {artist && piece && (
+          <div className="absolute bottom-5 right-5 hidden max-w-xs rounded-sm bg-[var(--color-ink)]/85 px-4 py-3 text-right backdrop-blur sm:block">
+            <p className="font-hand text-xl text-[var(--color-marigold)]">from {artist.neighborhood}</p>
+            <p className="font-display text-base font-semibold text-white">“{piece.title}” — {artist.name}</p>
+          </div>
+        )}
       </div>
     </section>
   );

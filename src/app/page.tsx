@@ -38,7 +38,51 @@ export default async function HomePage() {
         {/* Full-bleed hero */}
         <HomeHero artworks={artworks} artists={artists} />
 
-        {/* ── MISSION — the one mustard color-block moment ── */}
+        {/* ── CURRENT EXHIBITION — lively overlapping thumbnails ── */}
+        <section className="relative overflow-hidden bg-white py-16">
+          {/* orange accent blob, like the reference */}
+          <div className="pointer-events-none absolute -top-10 right-[8%] h-40 w-32 rounded-b-full bg-[var(--color-clay)]" aria-hidden />
+          <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.6fr]">
+            <div>
+              <h2 className="font-display text-4xl font-semibold leading-tight text-[var(--color-ink)] sm:text-5xl">
+                Current<br />exhibition
+              </h2>
+              <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-[var(--color-ink-2)]">
+                Fresh work from artists on your block, hung this week. Every piece is
+                one of one — and 90% of the price goes straight to the maker.
+              </p>
+              <Link href="/browse" className="btn-primary mt-6">See what&apos;s up</Link>
+            </div>
+            {/* overlapping tilted thumbnails */}
+            <div className="flex items-center justify-center gap-0 sm:justify-start">
+              {artworks.slice(0, 4).map((w, i) => {
+                const rot = ["-rotate-3", "rotate-2", "-rotate-2", "rotate-3"][i % 4];
+                const mt = ["mt-0", "mt-8", "mt-2", "mt-10"][i % 4];
+                return (
+                  <Link
+                    key={w.id}
+                    href={`/art/${w.slug}`}
+                    className={`group relative -ml-4 first:ml-0 ${mt} ${rot} transition-transform duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0`}
+                    style={{ zIndex: 4 - i }}
+                  >
+                    <div className="relative h-52 w-40 overflow-hidden rounded-sm border-4 border-white shadow-xl sm:h-64 sm:w-48">
+                      <Image
+                        src={w.image}
+                        alt={w.title}
+                        fill
+                        sizes="200px"
+                        className="object-cover"
+                        unoptimized={!w.image.includes("unsplash.com")}
+                      />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── MISSION — warm mustard color-block moment ── */}
         <section className="bg-[var(--color-marigold)]">
           <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_1.2fr]">
             <div>
@@ -55,7 +99,7 @@ export default async function HomePage() {
                 Why neighbors?
               </Link>
             </div>
-            {/* Desaturated human/storytelling image */}
+            {/* storytelling image */}
             <div className="relative aspect-[16/10] w-full overflow-hidden rounded-sm">
               {spotlight?.avatar && (
                 <Image
@@ -63,7 +107,7 @@ export default async function HomePage() {
                   alt=""
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
-                  className="object-cover saturate-[0.2] transition duration-700 hover:saturate-100"
+                  className="object-cover"
                   unoptimized
                 />
               )}
